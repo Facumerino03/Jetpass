@@ -1,0 +1,56 @@
+@startuml class
+
+class User {
+    - firs_name: str
+    - last_name: str
+    - dni: str
+    - email: str
+    - phone: str
+    - address: str
+}
+
+class Pilot extends User {
+    - license_number: str
+    - password: str
+}
+
+class Owner extends User{
+    tax_id: int
+    tax_condition: str
+    billing_address: str
+}
+
+class Aircraft {
+    - registration_number: str
+    - type: str
+    - weight: int
+    - owner: Owner
+}
+
+class FlightPlan {
+    - pilot: Pilot
+    - requested_aerodrome: str
+    - departure_aerodrome: str
+    - first_alternative_aerodrome: str
+    - second_alternative_aerodrome: str
+    - destination_aerodrome: str
+    - aircraft_registration: Aircraft
+    - aircraft_type: Aircraft
+    - start_date: Date
+    - start_time_utc: Time
+    - end_date: Date
+    - end_time_utc: Time
+    - reason: str
+    - observations: str
+    - document_submission_date: Date
+    - document_submission_time: Time
+}
+
+
+
+
+Aircraft <-- Owner
+FlightPlan <-- Pilot
+FlightPlan <-- Aircraft
+
+@enduml
