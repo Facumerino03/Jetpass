@@ -2,6 +2,7 @@ import unittest
 from flask import current_app
 from app import create_app
 from app.services import Security
+from app.services.security import WerkzeugSecurity, PasslibSecurity
 import os
 
 class AppTestCase(unittest.TestCase):
@@ -20,12 +21,14 @@ class AppTestCase(unittest.TestCase):
         self.assertIsNotNone(current_app)
         
     def test_security_standard(self):
-        encrypted_password = Security.encrypt_password(self.PASSWORD)
-        self.assertTrue(Security.password_check(encrypted_password, self.PASSWORD))
+        security = Security(WerkzeugSecurity())
+        encrypted_password = security.encrypt_password(self.PASSWORD)
+        self.assertTrue(security.check_password(encrypted_password, self.PASSWORD))
         
     def test_security_passlib(self):
-        encrypted_password = Security.encrypt_password_passlib(self.PASSWORD)
-        self.assertTrue(Security.password_check_passlib(encrypted_password, self.PASSWORD))
+        security = Security(PasslibSecurity())
+        encrypted_password = security.encrypt_password(self.PASSWORD)
+        self.assertTrue(security.check_password(encrypted_password, self.PASSWORD))
 
 if __name__ == '__main__':
     unittest.main()
