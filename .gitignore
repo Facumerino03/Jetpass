@@ -141,3 +141,7 @@ pyvenv.cfg
 
 # add migration files
 migrations/
+
+
+/docs/notes.txt
+notes.txt

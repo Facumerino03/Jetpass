@@ -6,6 +6,7 @@ from app.services.security_manager import Security
 
 
 class UserServices:
+    """Clase que se encarga del CRUD de los usuarios"""
     
     @staticmethod
     def save(user: User) -> User:
