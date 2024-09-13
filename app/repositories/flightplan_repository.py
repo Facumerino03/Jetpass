@@ -1,29 +1,24 @@
 from typing import List
 from app.models import FlightPlan
 from app import db
+from repositories import AbstractRepository
 
-class FlightPlanRepository:
+class FlightPlanRepository(AbstractRepository):
     
-    @staticmethod
-    def save(flightplan:FlightPlan) -> FlightPlan:
+    def save(self, flightplan:FlightPlan) -> FlightPlan:
         db.session.add(flightplan)
         db.session.commit()
-
         return flightplan
-   
-    @staticmethod   
-    def find_all() -> List['FlightPlan']:
+      
+    def find_all(self) -> List['FlightPlan']:
         return FlightPlan.query.all()
 
-    @staticmethod
-    def find_by(**kargs) -> List['FlightPlan']:
+    def find_by(self, **kargs) -> List['FlightPlan']:
         return FlightPlan.query.filter_by(**kargs).all()
         
-    @staticmethod
-    def find(id:int) -> 'FlightPlan':
+    def find(self, id:int) -> 'FlightPlan':
         return FlightPlan.query.get(id)
     
-    @staticmethod
-    def delete(flightplan:FlightPlan) -> None:
+    def delete(self, flightplan:FlightPlan) -> None:
         db.session.delete(flightplan)
         db.session.commit()

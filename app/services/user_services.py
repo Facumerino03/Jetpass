@@ -1,4 +1,4 @@
-from app.repositories.user_repository import UserRepository
+from app.repositories import UserRepository
 from app.models import User
 from typing import List
 from app.services.security import WerkzeugSecurity
