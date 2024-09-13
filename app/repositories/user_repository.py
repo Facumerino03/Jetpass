@@ -1,15 +1,11 @@
 from typing import List
 from app.models import User
 from app import db
-from app.services import Security
 
 class UserRepository:
     
     @staticmethod
     def save(user:User) -> User:
-        if user.id is None:
-            user.password = Security.encrypt_password(user.password)
-        
         db.session.add(user)
         db.session.commit()
 
