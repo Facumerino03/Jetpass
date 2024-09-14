@@ -25,6 +25,7 @@ class FlightPlanServices:
         flightplan = FlightPlanRepository().find(id)
         return flightplan
     
-    @staticmethod
-    def delete(flightplan:FlightPlan) -> None:
-        FlightPlanRepository().delete(flightplan)
+    #Descartamos el método delete, ya que no se puede eliminar un plan de vuelo
+    # @staticmethod
+    # def delete(flightplan:FlightPlan) -> None:
+    #     FlightPlanRepository().delete(flightplan)

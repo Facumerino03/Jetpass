@@ -56,14 +56,15 @@ class UserTestCase(unittest.TestCase):
         self.assertIsNotNone(flightplan_save.id)
         self.assertGreater(flightplan_save.id, 0)
     
-    def test_delete(self):
-        flightplan = self.__new_flightplan()
-        flightplan_save = repository.save(flightplan)
-        self.assertIsNotNone(flightplan_save)
-        self.assertIsNotNone(flightplan_save.id)
-        self.assertGreater(flightplan_save.id, 0)
-        flightplan_delete = repository.delete(flightplan_save)
-        self.assertIsNone(flightplan_delete)
+    #No testear el método delete, ya que no se puede eliminar un plan de vuelo
+    # def test_delete(self):
+    #     flightplan = self.__new_flightplan()
+    #     flightplan_save = repository.save(flightplan)
+    #     self.assertIsNotNone(flightplan_save)
+    #     self.assertIsNotNone(flightplan_save.id)
+    #     self.assertGreater(flightplan_save.id, 0)
+    #     flightplan_delete = repository.delete(flightplan_save)
+    #     self.assertIsNone(flightplan_delete)
     
     def test_find(self):
         flightplan = self.__new_flightplan()

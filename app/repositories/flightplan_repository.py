@@ -1,9 +1,11 @@
+from re import U
 from typing import List
 from app.models import FlightPlan
 from app import db
-from repositories import AbstractRepository
+#TODO:Preguntar porque la importancion tiene que ser con el .base_repository
+from app.repositories.base_repository import CreateAbstractRepository, ReadAbstractRepository
 
-class FlightPlanRepository(AbstractRepository):
+class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository):
     
     def save(self, flightplan:FlightPlan) -> FlightPlan:
         db.session.add(flightplan)
@@ -19,6 +21,7 @@ class FlightPlanRepository(AbstractRepository):
     def find(self, id:int) -> 'FlightPlan':
         return FlightPlan.query.get(id)
     
-    def delete(self, flightplan:FlightPlan) -> None:
-        db.session.delete(flightplan)
-        db.session.commit()
+    #Descartamos el método delete, ya que no se puede eliminar un plan de vuelo
+    # def delete(self, flightplan:FlightPlan) -> None:
+    #     db.session.delete(flightplan)
+    #     db.session.commit()
