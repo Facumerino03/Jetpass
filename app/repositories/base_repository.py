@@ -5,29 +5,29 @@ from flask_sqlalchemy import model
 
 class CreateAbstractRepository(ABC):
     @abstractmethod
-    def save(self, model:db.Model) -> db.Model:
+    def save(self, model:db.Model) -> db.Model: # type: ignore
         pass
     
 class ReadAbstractRepository(ABC):
     @abstractmethod
-    def find_all(self) -> List[db.Model]:
+    def find_all(self) -> List[db.Model]: # type: ignore
         pass
     
     @abstractmethod
-    def find_by(self, **kargs) -> List[db.Model]:
+    def find_by(self, **kargs) -> List[db.Model]: # type: ignore
         pass
     
     @abstractmethod
-    def find(self, id:int) -> db.Model:
+    def find(self, id:int) -> db.Model: # type: ignore
         pass
 
 class UpdateAbstractRepository(ABC):
     @abstractmethod
-    def update(self, model:db.Model) -> db.Model:
+    def update(self, model:db.Model) -> db.Model: # type: ignore
         pass
 
 class DeleteAbstractRepository(ABC):
     @abstractmethod
-    def delete(self, model:db.Model) -> db.Model:
+    def delete(self, model:db.Model) -> db.Model: # type: ignore
         pass
 
