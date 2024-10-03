@@ -15,7 +15,6 @@ class User {
 
 class Pilot extends User {
     - license_number: str
-    - password: str
 }
 
 class Owner extends User{
