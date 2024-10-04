@@ -1,20 +1,28 @@
+from email import message
 from flask import Blueprint, jsonify
-from app.mapping import UserMap
+from app.mapping import UserSchema
 from app.services import UserServices
-
+from app.mapping import MessageSchema
+from app.services import Message, MessageBuilder
 
 user_bp = Blueprint('user', __name__)
-user_map = UserMap()
+user_map = UserSchema()
 
-@user_bp.route('/users/<int:id>', methods=['GET'])
+@user_bp.route('/user/<int:id>', methods=['GET'])
 def get(id: int):
     user = UserServices.find(id)
-    return user_map.dumps(user, many=False), 200
+    message_schema = MessageSchema()
+    message_builder = MessageBuilder()
+    message_filled = message_builder.add_message('User found').add_data(user_map.dump(user)).build()
+    return message_schema.dump(message_filled), 200
 
 @user_bp.route('/users', methods=['GET'])
 def get_all():
     users = UserServices.find_all()
-    return user_map.dumps(users, many=True), 200
+    message_schema = MessageSchema()
+    message_builder = MessageBuilder()
+    message_filled = message_builder.add_message('Users found').add_data(user_map.dump(users, many=True)).build()
+    return message_schema.dump(message_filled), 200
 
 @user_bp.route('/users', methods=['POST'])
 def post():

@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, validate, post_load
 from app.models import User
 
-class UserMap(Schema):
+class UserSchema(Schema):
 
     id:int = fields.Integer(dump_only=True)
     firstname:str = fields.String(required=True)
