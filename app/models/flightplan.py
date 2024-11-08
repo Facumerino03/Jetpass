@@ -11,18 +11,19 @@ class FlightPlan(db.Model):
     __tablename__ = "flight_plans"
     
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
-    submission_date:date = db.Column("submission_date", db.DateTime(100), nullable=False)
+    submission_date:date = db.Column("submission_date", db.DateTime, nullable=False)
     priority:str = db.Column("priority", db.String(100), nullable=False, default="FF")
     address_to:str = db.Column("address_to", db.String(100), nullable=False)
-    filing_time:date = db.Column("filing_time", db.DateTime(100), nullable=False)
-    originator:str = db.Column("originator", db.String(100), nullable=False)
+    #TODO: validar con marshmallow
+    filing_time:date = db.Column("filing_time", db.DateTime, nullable=False)
+    originator:str = db.Column("originator", db.String(8), nullable=False)
     message_type:str = db.Column("message_type", db.String(100), nullable=False, default="FPL")
-    aircraft_id = db.Column("aircraft_id", db.Integer, db.foreingKey("aircraft.id"))
+    aircraft_id = db.Column("aircraft_id", db.Integer, db.ForeignKey("aircrafts.id"))
     flight_rules = db.Column("flight_rules", Enum('I', 'V', 'Y', 'Z', name="flight_rules"), nullable=False)
     flight_type = db.Column("flight_type", Enum('S', 'N', 'G', 'M', 'X', name="flight_type"), nullable=False)
     number_of_aircraft:int = db.Column("number_of_aircraft", db.Integer, nullable=False)
-    pilot_id:int = db.Column("pilot_id", db.Integer, db.foreingKey("pilot.id"))
-    departure_aerodrome_id:int = db.Column("departure_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
+    pilot_id:int = db.Column("pilot_id", db.Integer, db.ForeignKey("pilots.id"))
+    departure_aerodrome_id:int = db.Column("departure_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
     #TODO: validar fecha UTC con marshmallow (maximo cuatro cifras)
     departure_time = db.Column("departure_time", db.DateTime, nullable=False)
     #TODO: validar con marshmallow donde debe ser en formato N (de nudos) o K (kilometros) seguido de cuatro cifras
@@ -30,18 +31,18 @@ class FlightPlan(db.Model):
     #TODO: validar con marshmallow donde debe ser S seguido de cuatro cifras, A seguido de tres cifras o M seguido de cuatro cifras o VFR en vuelos no controlados
     cruising_level = db.Column("cruising_level", db.String(5), nullable=False)
     route:str = db.Column("route", db.String(100), nullable=False)
-    destination_aerodrome_id:int = db.Column("destination_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
+    destination_aerodrome_id:int = db.Column("destination_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
     #TODO: formato HRMN validar con marshmallow
     total_estimated_elapsed_time = db.Column("total_estimated_elapsed_time", db.String(100), nullable=False)
-    first_alternative_aerodrome_id:int = db.Column("first_alternative_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
-    second_alternative_aerodrome_id:int = db.Column("second_alternative_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
+    first_alternative_aerodrome_id:int = db.Column("first_alternative_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
+    second_alternative_aerodrome_id:int = db.Column("second_alternative_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
     other_information:str = db.Column("other_information", db.String(256), nullable=False)
-    persons_on_board:int = db.Column("persons_on_board", db.Integer(4), nullable=False)
-    emergency_equipment_data_id = db.Column("emergency_equipment_data_id", db.Integer, db.foreingKey("emergency_equipment_data.id"))
+    persons_on_board:int = db.Column("persons_on_board", db.Integer, nullable=False)
+    emergency_equipment_data_id = db.Column("emergency_equipment_data_id", db.Integer, db.ForeignKey("emergency_equipment_data.id"))
     remarks:bool = db.Column("remarks", db.Boolean, nullable=False, default=False)
     remarks_details:str = db.Column("remarks_details", db.String(256), nullable=False)
-    pilot_id:int = db.Column("pilot_id", db.Integer, db.foreingKey("pilot.id"))
-    filled_by_user_id:int = db.Column("filled_by_user_id", db.Integer, db.foreingKey("user.id"))
+    pilot_id:int = db.Column("pilot_id", db.Integer, db.ForeignKey("pilots.id"))
+    filled_by_user_id:int = db.Column("filled_by_user_id", db.Integer, db.ForeignKey("users.id"))
     document_signature_filename:str = db.Column("document_signature_filename", db.String(100), nullable=False)
     
     

@@ -1,11 +1,10 @@
 from datetime import date, datetime
 import unittest
 from flask import current_app
-from flask.cli import F
 from app import create_app
 from app import db
 import os
-from app.models import FlightPlan, flightplan
+from app.models import FlightPlan, User, Pilot, Aircraft, Airport, EmergencyEquipmentData
 from app.repositories import FlightPlanRepository
 
 repository = FlightPlanRepository()
