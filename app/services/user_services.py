@@ -4,41 +4,39 @@ from typing import List
 from app.services.security import WerkzeugSecurity
 from app.services.security_manager import Security
 
-
 class UserServices:
     """Clase que se encarga del CRUD de los usuarios"""
     
-    @staticmethod
-    def save(user: User) -> User:
+    def __init__(self):
+        self.user_repository = UserRepository()
+    
+    def save(self, user: User) -> User:
         if user.id is None:
             security = Security(WerkzeugSecurity())
             user.password = security.encrypt_password(user.password)
-        user = UserRepository.save(user)
+        user = self.user_repository.save(user)
         return user
     
-    @staticmethod
-    def update(user: User, id: int) -> User:
+    def update(self, user: User, id: int) -> User:
         if user.password is not None:
             security = Security(WerkzeugSecurity())
             user.password = security.encrypt_password(user.password)
         
-        return UserRepository.update(user, id)
+        return self.user_repository.update(user, id)
     
-    @staticmethod   
-    def find_all() -> List['User']:
-        users = UserRepository.find_all()
+    def find_all(self) -> List['User']:
+        users = self.user_repository.find_all()
         return users
 
-    @staticmethod
-    def find_by(**kargs) -> List['User']:
-        users = UserRepository.find_by(**kargs)
+    def find_by(self, **kargs) -> List['User']:
+        users = self.user_repository.find_by(**kargs)
         return users
         
-    @staticmethod
-    def find(id:int) -> 'User':
-        user = UserRepository.find(id)
+    def find(self, id:int) -> 'User':
+        user = self.user_repository.find(id)
         return user
     
-    @staticmethod
-    def delete(id:int) -> None:
-        UserRepository.delete(id)
+    def delete(self, id:int) -> None:
+        user = self.user_repository.find(id)
+        if user:
+            self.user_repository.delete(user)
