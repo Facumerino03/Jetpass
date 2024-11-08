@@ -6,15 +6,13 @@ from app.repositories.base_repository import CreateAbstractRepository, ReadAbstr
 
 class UserRepository(CreateAbstractRepository, ReadAbstractRepository, DeleteAbstractRepository):
     
-    @staticmethod
-    def save(user: User) -> User:
+    def save(self, user: User) -> User:
         db.session.add(user)
         db.session.commit()
         return user
     
-    @staticmethod
-    def update(user: User, id: int) -> User:
-        entity = UserRepository.find(id)
+    def update(self, user: User, id: int) -> User:
+        entity = self.find(id)
         
         if entity is None:
             return None
@@ -35,18 +33,14 @@ class UserRepository(CreateAbstractRepository, ReadAbstractRepository, DeleteAbs
         db.session.add(entity)
         db.session.commit()
         return entity
-        
     
-    @staticmethod   
-    def find_all() -> List[User]:
+    def find_all(self) -> List[User]:
         return User.query.all()
-
-    @staticmethod
-    def find_by(**kargs) -> List[User]:
+    
+    def find_by(self, **kargs) -> List[User]:
         return User.query.filter_by(**kargs).all()
-        
-    @staticmethod
-    def find(id: int) -> User:
+    
+    def find(self, id: int) -> User:
         result = None
         if id is not None:
             try:
@@ -55,11 +49,10 @@ class UserRepository(CreateAbstractRepository, ReadAbstractRepository, DeleteAbs
                 logging.error(f'error getting user by id: {id}, {e}') 
         return result
     
-    @staticmethod
-    def delete(id: int) -> None:
-        user = UserRepository.find(id)
-        if user:
-            db.session.delete(user)
+    def delete(self, user: User) -> None:
+        existing_user = self.find(user.id)
+        if existing_user:
+            db.session.delete(existing_user)
             db.session.commit()
         else:
-            logging.error(f'error deleting user by id: {id}')
+            logging.error(f'error deleting user by id: {user.id}')

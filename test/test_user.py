@@ -1,12 +1,11 @@
 import unittest
 from flask import current_app
-from app import create_app
+from app import create_app, db
 import os
 from app.models import User
-from app import db
-from app.services import UserServices
-from app.services.security import WerkzeugSecurity
-repository = UserServices()
+from app.repositories import UserRepository
+
+repository = UserRepository()
 
 class UserTestCase(unittest.TestCase):
 
@@ -46,27 +45,17 @@ class UserTestCase(unittest.TestCase):
         self.assertIsNotNone(user_save)
         self.assertIsNotNone(user_save.id)
         self.assertGreater(user_save.id, 0)
-        
-    def test_delete(self):
-        user = self.__new_user()
-        user_save = repository.save(user)
-        self.assertIsNotNone(user_save)
-        self.assertIsNotNone(user_save.id)
-        self.assertGreater(user_save.id, 0)
-        user_delete = repository.delete(user_save)
-        self.assertIsNone(user_delete)
-        
+
     def test_find(self):
         user = self.__new_user()
         user_save = repository.save(user)
         self.assertIsNotNone(user_save)
         self.assertIsNotNone(user_save.id)
         self.assertGreater(user_save.id, 0)
-        user = repository.find(1)
+        user = repository.find(user_save.id)
         self.assertIsNotNone(user)
-        self.assertIsNotNone(user_save.id)
-        self.assertGreater(user_save.id, 0)
-        
+        self.assertEqual(user.id, user_save.id)
+
     def test_find_all(self):
         user = self.__new_user()
         user2 = self.__new_user()
@@ -80,40 +69,48 @@ class UserTestCase(unittest.TestCase):
         users = repository.find_all()
         self.assertIsNotNone(users)
         self.assertGreater(len(users), 1)
-        
+
     def test_find_by(self):
         user = self.__new_user()
         user_save = repository.save(user)
         self.assertIsNotNone(user_save)
         self.assertIsNotNone(user_save.id)
         self.assertGreater(user_save.id, 0)
-        user = repository.find_by(dni='26134242')
-        self.assertIsNotNone(user)
-        self.assertGreater(len(user), 0)
-        
+        users = repository.find_by(dni='26134242')
+        self.assertIsNotNone(users)
+        self.assertGreater(len(users), 0)
+
     def test_update(self):
         user = self.__new_user()
         user_save = repository.save(user)
         user_save.email = 'nuevo@gmail.com'
-        user_save_update = repository.save(user_save)
-        #apuntan al mismo objeto
+        user_save_update = repository.update(user_save, user_save.id)
+        self.assertIsNotNone(user_save_update)
         self.assertEqual(user_save_update.email, 'nuevo@gmail.com')
-        self.assertEqual(user_save.email, user_save_update.email)
-        self.assertEqual(user.email, user_save_update.email)
-        #self.assertTrue(Security.password_check(user.password, "f@dKhfi3h%Ym43r$3jM2"))
+
+    def test_delete(self):
+        user = self.__new_user()
+        user_save = repository.save(user)
+        self.assertIsNotNone(user_save)
+        self.assertIsNotNone(user_save.id)
+        self.assertGreater(user_save.id, 0)
+        repository.delete(user_save)
+        user_delete = repository.find(user_save.id)
+        self.assertIsNone(user_delete)
 
     def __new_user(self):
-        user = User()
-        user.firstname = "Facundo"
-        user.lastname = "Merino"
-        user.dni = "26134242"
-        user.email = "test@gmail.com"
-        user.phone = "26134242"
-        user.address = "Suite 951 312 Mark Summit, Shondamouth, UT 89664"
-        user.state = "Utah"
-        user.city = "Shondamouth"
-        user.zipcode = "89664"
-        user.password = "f@dKhfi3h%Ym43r$3jM2"
+        user = User(
+            firstname="Facundo",
+            lastname="Merino",
+            dni="26134242",
+            email="test@gmail.com",
+            phone="26134242",
+            address="Suite 951 312 Mark Summit, Shondamouth, UT 89664",
+            state="Utah",
+            city="Shondamouth",
+            zipcode="89664",
+            password="f@dKhfi3h%Ym43r$3jM2"
+        )
         return user
 
 if __name__ == '__main__':

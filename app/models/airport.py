@@ -24,13 +24,13 @@ class Airport(db.Model):
         return (
             self.id == airport.id and
             self.name == airport.name and
-            self.code == airport.code and
+            self.airport_code == airport.airport_code and
             self.city == airport.city and
             self.country == airport.country and
+            self.south_coordinates == airport.south_coordinates and
+            self.west_coordinates == airport.west_coordinates and
             self.latitude == airport.latitude and
-            self.longitude == airport.longitude and
             self.elevation == airport.elevation and
             self.runway_length == airport.runway_length and
-            self.runway_count == airport.runway_count and
             self.traffic_type_allowed == airport.traffic_type_allowed
         )
