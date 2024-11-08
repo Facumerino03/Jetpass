@@ -1,5 +1,4 @@
 import logging
-from math import e
 from typing import List
 from app.models import User
 from app import db

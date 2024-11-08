@@ -1,4 +1,3 @@
-from re import U
 from typing import List
 from app.models import FlightPlan
 from app import db

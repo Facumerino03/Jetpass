@@ -1,3 +1,4 @@
 from .user_repository import UserRepository
 from .flightplan_repository import FlightPlanRepository
+from .pilot_repository import PilotRepository
 from .base_repository import CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository
