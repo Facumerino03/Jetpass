@@ -15,7 +15,15 @@ class UserServices:
             user.password = security.encrypt_password(user.password)
         user = UserRepository.save(user)
         return user
-   
+    
+    @staticmethod
+    def update(user: User, id: int) -> User:
+        if user.password is not None:
+            security = Security(WerkzeugSecurity())
+            user.password = security.encrypt_password(user.password)
+        
+        return UserRepository.update(user, id)
+    
     @staticmethod   
     def find_all() -> List['User']:
         users = UserRepository.find_all()
@@ -32,5 +40,5 @@ class UserServices:
         return user
     
     @staticmethod
-    def delete(user:User) -> None:
-        UserRepository.delete(user)
+    def delete(id:int) -> None:
+        UserRepository.delete(id)

@@ -1,31 +1,79 @@
 from dataclasses import dataclass
-from turtle import st
+from datetime import date
+from sqlalchemy import Enum
 from app import db
 
 @dataclass(init=True,eq=False)
 class FlightPlan(db.Model):
     """
-    Clase que representa un usuario del sistema con distintos perfiles.
+    Class representing the flight plans and its attributes
     """
     __tablename__ = "flight_plans"
+    
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
-    pilot:str = db.Column("pilot", db.String(100), nullable=False)
-    requested_aerodrome:str = db.Column("requested_aerodrome", db.String(100), nullable=False)
-    departure_aerodrome:str = db.Column("departure_aerodrome", db.String(100), nullable=False)
-    first_alternative_aerodrome:str = db.Column("first_alternative_aerodrome", db.String(100), nullable=False)
-    second_alternative_aerodrome:str = db.Column("second_alternative_aerodrome", db.String(100), nullable=False)
-    destination_aerodrome:str = db.Column("destination_aerodrome", db.String(100), nullable=False)
-    aircraft_registration:str = db.Column("aircraft_registration", db.String(100), nullable=False)
-    aircraft_type:str = db.Column("aircraft_type", db.String(100), nullable=False)
-    start_date = db.Column("start_date", db.DateTime(100), nullable=False)
-    start_time_utc = db.Column("start_time_utc", db.DateTime(100), nullable=False)
-    end_date = db.Column("end_date", db.DateTime(100), nullable=False)
-    end_time_utc = db.Column("end_time_utc", db.DateTime(100), nullable=False)
-    reason:str = db.Column("reason", db.String(100), nullable=False)
-    observations:str = db.Column("observations", db.String(100), nullable=False)
-    document_submission_date = db.Column("document_submission_date", db.DateTime(100), nullable=False)
-    document_submission_time = db.Column("document_submission_time", db.DateTime(100), nullable=False)
+    submission_date:date = db.Column("submission_date", db.DateTime(100), nullable=False)
+    priority:str = db.Column("priority", db.String(100), nullable=False, default="FF")
+    address_to:str = db.Column("address_to", db.String(100), nullable=False)
+    filing_time:date = db.Column("filing_time", db.DateTime(100), nullable=False)
+    originator:str = db.Column("originator", db.String(100), nullable=False)
+    message_type:str = db.Column("message_type", db.String(100), nullable=False, default="FPL")
+    aircraft_id = db.Column("aircraft_id", db.Integer, db.foreingKey("aircraft.id"))
+    flight_rules = db.Column("flight_rules", Enum('I', 'V', 'Y', 'Z', name="flight_rules"), nullable=False)
+    flight_type = db.Column("flight_type", Enum('S', 'N', 'G', 'M', 'X', name="flight_type"), nullable=False)
+    number_of_aircraft:int = db.Column("number_of_aircraft", db.Integer, nullable=False)
+    pilot_id:int = db.Column("pilot_id", db.Integer, db.foreingKey("pilot.id"))
+    departure_aerodrome_id:int = db.Column("departure_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
+    #TODO: validar fecha UTC con marshmallow (maximo cuatro cifras)
+    departure_time = db.Column("departure_time", db.DateTime, nullable=False)
+    #TODO: validar con marshmallow donde debe ser en formato N (de nudos) o K (kilometros) seguido de cuatro cifras
+    cruising_speed = db.Column("cruising_speed", db.String(5), nullable=False)
+    #TODO: validar con marshmallow donde debe ser S seguido de cuatro cifras, A seguido de tres cifras o M seguido de cuatro cifras o VFR en vuelos no controlados
+    cruising_level = db.Column("cruising_level", db.String(5), nullable=False)
+    route:str = db.Column("route", db.String(100), nullable=False)
+    destination_aerodrome_id:int = db.Column("destination_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
+    #TODO: formato HRMN validar con marshmallow
+    total_estimated_elapsed_time = db.Column("total_estimated_elapsed_time", db.String(100), nullable=False)
+    first_alternative_aerodrome_id:int = db.Column("first_alternative_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
+    second_alternative_aerodrome_id:int = db.Column("second_alternative_aerodrome_id", db.Integer, db.foreingKey("airport.id"))
+    other_information:str = db.Column("other_information", db.String(256), nullable=False)
+    persons_on_board:int = db.Column("persons_on_board", db.Integer(4), nullable=False)
+    emergency_equipment_data_id = db.Column("emergency_equipment_data_id", db.Integer, db.foreingKey("emergency_equipment_data.id"))
+    remarks:bool = db.Column("remarks", db.Boolean, nullable=False, default=False)
+    remarks_details:str = db.Column("remarks_details", db.String(256), nullable=False)
+    pilot_id:int = db.Column("pilot_id", db.Integer, db.foreingKey("pilot.id"))
+    filled_by_user_id:int = db.Column("filled_by_user_id", db.Integer, db.foreingKey("user.id"))
+    document_signature_filename:str = db.Column("document_signature_filename", db.String(100), nullable=False)
     
     
-    def __eq__(self, flightplan: object) -> bool:
-        return self.id == flightplan.id and self.pilot == flightplan.pilot and self.requested_aerodrome == flightplan.requested_aerodrome and self.departure_aerodrome == flightplan.departure_aerodrome and self.first_alternative_aerodrome == flightplan.first_alternative_aerodrome and self.second_alternative_aerodrome == flightplan.second_alternative_aerodrome and self.destination_aerodrome == flightplan.destination_aerodrome and self.aircraft_registration == flightplan.aircraft_registration and self.aircraft_type == flightplan.aircraft_type and self.start_date == flightplan.start_date and self.start_time_utc == flightplan.start_time_utc and self.end_date == flightplan.end_date and self.end_time_utc == flightplan.end_time_utc and self.reason == flightplan.reason and self.observations == flightplan.observations and self.document_submission_date == flightplan.document_submission_date and self.document_submission_time == flightplan.document_submission_time
+    def __eq__(self, flight_plan: object) -> bool:
+        return (
+            self.id == flight_plan.id and
+            self.submission_date == flight_plan.submission_date and
+            self.priority == flight_plan.priority and
+            self.address_to == flight_plan.address_to and
+            self.filing_time == flight_plan.filing_time and
+            self.originator == flight_plan.originator and
+            self.message_type == flight_plan.message_type and
+            self.aircraft_id == flight_plan.aircraft_id and
+            self.flight_rules == flight_plan.flight_rules and
+            self.flight_type == flight_plan.flight_type and
+            self.number_of_aircraft == flight_plan.number_of_aircraft and
+            self.pilot_id == flight_plan.pilot_id and
+            self.departure_aerodrome_id == flight_plan.departure_aerodrome_id and
+            self.departure_time == flight_plan.departure_time and
+            self.cruising_speed == flight_plan.cruising_speed and
+            self.cruising_level == flight_plan.cruising_level and
+            self.route == flight_plan.route and
+            self.destination_aerodrome_id == flight_plan.destination_aerodrome_id and
+            self.total_estimated_elapsed_time == flight_plan.total_estimated_elapsed_time and
+            self.first_alternative_aerodrome_id == flight_plan.first_alternative_aerodrome_id and
+            self.second_alternative_aerodrome_id == flight_plan.second_alternative_aerodrome_id and
+            self.other_information == flight_plan.other_information and
+            self.persons_on_board == flight_plan.persons_on_board and
+            self.emergency_equipment_data_id == flight_plan.emergency_equipment_data_id and
+            self.remarks == flight_plan.remarks and
+            self.remarks_details == flight_plan.remarks_details and
+            self.pilot_id == flight_plan.pilot_id and
+            self.filled_by_user_id == flight_plan.filled_by_user_id and
+            self.document_signature_filename == flight_plan.document_signature_filename
+        )
