@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 import logging
 from typing import List
 from app.models import User
@@ -7,8 +8,13 @@ from app.repositories.base_repository import CreateAbstractRepository, ReadAbstr
 class UserRepository(CreateAbstractRepository, ReadAbstractRepository, DeleteAbstractRepository):
     
     def save(self, user: User) -> User:
-        db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            logging.error(f'error saving user: {e}')
+            raise ValueError("A user with the same DNI or email already exists.")
         return user
     
     def update(self, user: User, id: int) -> User:
@@ -30,8 +36,14 @@ class UserRepository(CreateAbstractRepository, ReadAbstractRepository, DeleteAbs
         if user.password is not None:
             entity.password = user.password
         
-        db.session.add(entity)
-        db.session.commit()
+        try:
+            db.session.add(entity)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            logging.error(f'error updating user: {e}')
+            raise ValueError("A user with the same DNI or email already exists.")
+        
         return entity
     
     def find_all(self) -> List[User]:
