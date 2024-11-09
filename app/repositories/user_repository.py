@@ -43,7 +43,6 @@ class UserRepository(CreateAbstractRepository, ReadAbstractRepository, DeleteAbs
             db.session.rollback()
             logging.error(f'error updating user: {e}')
             raise ValueError("A user with the same DNI or email already exists.")
-        
         return entity
     
     def find_all(self) -> List[User]:
