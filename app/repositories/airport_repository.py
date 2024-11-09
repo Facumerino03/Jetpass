@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 import logging
 from typing import List
 from app.models import Airport
@@ -7,8 +8,13 @@ from app.repositories.base_repository import CreateAbstractRepository, ReadAbstr
 class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository):
     
     def save(self, airport: Airport) -> Airport:
-        db.session.add(airport)
-        db.session.commit()
+        try:
+            db.session.add(airport)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            logging.error(f'error saving airport: {e}')
+            raise ValueError("An airport with the same code already exists.")
         return airport
       
     def find_all(self) -> List[Airport]:
@@ -23,7 +29,7 @@ class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, Update
             try:
                 result = Airport.query.get(id)
             except Exception as e:
-                logging.error(f'error getting airport by id: {id}, {e}') 
+                logging.error(f'error getting airport by id: {id}, {e}')
         return result
     
     def delete(self, airport: Airport) -> None:
@@ -34,8 +40,8 @@ class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, Update
         else:
             logging.error(f'error deleting airport by id: {airport.id}')
     
-    def update(self, airport: Airport) -> Airport:
-        existing_airport = self.find(airport.id)
+    def update(self, airport: Airport, id: int) -> Airport:
+        existing_airport = self.find(id)
         
         if existing_airport is None:
             return None
@@ -51,5 +57,11 @@ class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, Update
         existing_airport.runway_length = airport.runway_length
         existing_airport.traffic_type_allowed = airport.traffic_type_allowed
         
-        db.session.commit()
+        try:
+            db.session.add(existing_airport)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            logging.error(f'error updating airport: {e}')
+            raise ValueError("An airport with the same code already exists.")
         return existing_airport
