@@ -39,6 +39,7 @@ def post_airport():
         airport_saved = airport_services.save(airport)
         logging.info(f'Airport saved id: {airport_saved.id}')
         return build_response('Airport saved', data=airport_map.dump(airport_saved), code=201)
+    
     except ValueError as e:
         logging.error(f'Error saving airport: {e}')
         return build_response(str(e), code=400)

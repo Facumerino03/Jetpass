@@ -1,0 +1,1 @@
+from .airport_enum import TrafficTypeAllowedEnum

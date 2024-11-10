@@ -1,0 +1,19 @@
+Clasificación de Aeropuertos según la OACI
+Aeropuertos Transoceánicos:
+Capacidad: Admiten aeronaves de hasta 135 toneladas.
+Aeropuertos Transcontinentales:
+Capacidad: Deben admitir aeronaves de hasta 90 toneladas.
+Aeropuertos Internacionales:
+Capacidad: Admiten aeronaves de hasta 60 toneladas.
+Aeropuertos Nacionales:
+Capacidad: Admiten aeronaves de hasta 40 toneladas.
+Aeropuertos Locales:
+Capacidad: Admiten aeronaves de hasta 27 toneladas.
+Aeródromos menores:
+Capacidad: Diseñados para admitir aeronaves con un peso máximo de carga total de hasta 18 toneladas, sin requerir balizamiento nocturno ni medios de radionavegación.
+Aeródromos para carga mínima:
+Capacidad: Construidos para una carga mínima de 11 toneladas.
+Pequeños Aeropuertos:
+Capacidad: Construidos para aviones con un peso menor a 7,000 kilogramos.
+Helipuertos:
+Diseñados específicamente para operaciones de helicópteros.

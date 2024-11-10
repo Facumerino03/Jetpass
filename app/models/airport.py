@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from sqlalchemy import Enum
 from app import db
+from app.models.enums import TrafficTypeAllowedEnum
 
 @dataclass(init=True,eq=False)
 class Airport(db.Model):
@@ -18,7 +20,7 @@ class Airport(db.Model):
     latitude:float = db.Column("latitude", db.Float, nullable=False)
     elevation:float = db.Column("elevation", db.Float, nullable=False)
     runway_length:float = db.Column("runway_length", db.Float, nullable=False)
-    traffic_type_allowed:str = db.Column("traffic_type_allowed", db.String(100), nullable=False)
+    traffic_type_allowed:str = db.Column("traffic_type_allowed", Enum(TrafficTypeAllowedEnum), nullable=False)
     
     def __eq__(self, airport: object) -> bool:
         return (
