@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load, validate
 from app.models import Airport
 from app.models.enums import TrafficTypeAllowedEnum
-from app.mapping.custom_fields import EnumField
+from app.utils import EnumField
 
 class AirportSchema(Schema):
     id = fields.Integer(dump_only=True)
@@ -14,7 +14,7 @@ class AirportSchema(Schema):
     latitude = fields.Float(required=True)
     elevation = fields.Float(required=True)
     runway_length = fields.Float(required=True)
-    traffic_type_allowed = EnumField(required=True)
+    traffic_type_allowed = EnumField(TrafficTypeAllowedEnum, required=True)
 
     @post_load
     def bind_airport(self, data, **kwargs):
