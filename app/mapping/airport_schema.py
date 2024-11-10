@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, post_load, validate
+from marshmallow import Schema, fields, post_load, validate #type: ignore
 from app.models import Airport
 from app.models.enums import TrafficTypeAllowedEnum
 from app.utils import EnumField

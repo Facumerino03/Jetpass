@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from sqlalchemy.exc import IntegrityError
 from app.models import Aircraft
 from app import db
 from app.repositories.base_repository import CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository
@@ -7,8 +8,13 @@ from app.repositories.base_repository import CreateAbstractRepository, ReadAbstr
 class AircraftRepository(CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository):
     
     def save(self, aircraft: Aircraft) -> Aircraft:
-        db.session.add(aircraft)
-        db.session.commit()
+        try:
+            db.session.add(aircraft)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            logging.error(f'error saving aircraft: {e}')
+            raise ValueError("An aircraft with the same identification already exists.")
         return aircraft
       
     def find_all(self) -> List[Aircraft]:
@@ -50,5 +56,11 @@ class AircraftRepository(CreateAbstractRepository, ReadAbstractRepository, Updat
         existing_aircraft.max_speed = aircraft.max_speed
         existing_aircraft.aircraft_colour_and_marking = aircraft.aircraft_colour_and_marking
         
-        db.session.commit()
+        try:
+            db.session.add(existing_aircraft)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            logging.error(f'error updating aircraft: {e}')
+            raise ValueError("An aircraft with the same identification already exists.")
         return existing_aircraft

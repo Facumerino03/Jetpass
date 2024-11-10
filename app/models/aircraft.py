@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date
 from sqlalchemy import Enum
 from app import db
+from app.models.enums import WakeTurbulenceCategoryEnum
 
 @dataclass(init=True,eq=False)
 class Aircraft(db.Model):
@@ -13,7 +14,7 @@ class Aircraft(db.Model):
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
     aircraft_identification:str = db.Column("aircraft_identification", db.String(7), unique=True, nullable=False)
     aircraft_type:str = db.Column("aircraft_type", db.String(4), nullable=False)
-    wake_turbulence_category:str = db.Column("wake_turbulence_category", Enum('J', 'H', 'M', 'L', name='wake_turbulence_category'), nullable=False)
+    wake_turbulence_category: str = db.Column("wake_turbulence_category", Enum(WakeTurbulenceCategoryEnum), nullable=False)
     equipment:str = db.Column("equipment", db.String(100), nullable=False)
     #TODO: validar con marshmallow donde debe ser en formato HHMM
     endurance:date = db.Column("endurance", db.DateTime, nullable=False)

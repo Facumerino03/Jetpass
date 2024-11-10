@@ -1,1 +1,3 @@
 from .airport_enum import TrafficTypeAllowedEnum
+from .flight_plan_enum import FlightRulesEnum, FlightTypeEnum
+from .aircraft_enum import WakeTurbulenceCategoryEnum

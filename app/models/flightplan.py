@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date
 from sqlalchemy import Enum
 from app import db
+from app.models.enums import FlightRulesEnum, FlightTypeEnum
 
 @dataclass(init=True,eq=False)
 class FlightPlan(db.Model):
@@ -19,8 +20,8 @@ class FlightPlan(db.Model):
     originator:str = db.Column("originator", db.String(8), nullable=False)
     message_type:str = db.Column("message_type", db.String(100), nullable=False, default="FPL")
     aircraft_id = db.Column("aircraft_id", db.Integer, db.ForeignKey("aircrafts.id"))
-    flight_rules = db.Column("flight_rules", Enum('I', 'V', 'Y', 'Z', name="flight_rules"), nullable=False)
-    flight_type = db.Column("flight_type", Enum('S', 'N', 'G', 'M', 'X', name="flight_type"), nullable=False)
+    flight_rules = db.Column("flight_rules", Enum(FlightRulesEnum), nullable=False)
+    flight_type = db.Column("flight_type", Enum(FlightTypeEnum), nullable=False)
     number_of_aircraft:int = db.Column("number_of_aircraft", db.Integer, nullable=False)
     pilot_id:int = db.Column("pilot_id", db.Integer, db.ForeignKey("pilots.id"))
     departure_aerodrome_id:int = db.Column("departure_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
@@ -38,7 +39,8 @@ class FlightPlan(db.Model):
     second_alternative_aerodrome_id:int = db.Column("second_alternative_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
     other_information:str = db.Column("other_information", db.String(256), nullable=False)
     persons_on_board:int = db.Column("persons_on_board", db.Integer, nullable=False)
-    emergency_equipment_data_id = db.Column("emergency_equipment_data_id", db.Integer, db.ForeignKey("emergency_equipment_data.id"))
+    emergency_equipment_data_id: int = db.Column("emergency_equipment_data_id", db.Integer, db.ForeignKey('emergency_equipment_data.id'))
+    emergency_equipment_data = db.relationship('EmergencyEquipmentData', uselist=False, back_populates='flight_plan', cascade='all, delete-orphan')
     remarks:bool = db.Column("remarks", db.Boolean, nullable=False, default=False)
     remarks_details:str = db.Column("remarks_details", db.String(256), nullable=False)
     pilot_id:int = db.Column("pilot_id", db.Integer, db.ForeignKey("pilots.id"))
@@ -72,6 +74,7 @@ class FlightPlan(db.Model):
             self.other_information == flight_plan.other_information and
             self.persons_on_board == flight_plan.persons_on_board and
             self.emergency_equipment_data_id == flight_plan.emergency_equipment_data_id and
+            self.emergency_equipment_data == flight_plan.emergency_equipment_data and
             self.remarks == flight_plan.remarks and
             self.remarks_details == flight_plan.remarks_details and
             self.pilot_id == flight_plan.pilot_id and

@@ -1,7 +1,6 @@
 from flask import jsonify, request
 from functools import wraps
-
-from marshmallow import ValidationError
+from marshmallow import ValidationError #type: ignore
 
 def validate_with(schema):
     def decorator(f):
