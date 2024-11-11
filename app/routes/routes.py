@@ -10,3 +10,5 @@ class Route():
         app.register_blueprint(pilot_bp, url_prefix='/api/v1')
         from app.controllers import airport_bp
         app.register_blueprint(airport_bp, url_prefix='/api/v1')
+        from app.controllers import aircraft_bp
+        app.register_blueprint(aircraft_bp, url_prefix='/api/v1')

@@ -40,7 +40,7 @@ class FlightPlan(db.Model):
     other_information:str = db.Column("other_information", db.String(256), nullable=False)
     persons_on_board:int = db.Column("persons_on_board", db.Integer, nullable=False)
     emergency_equipment_data_id: int = db.Column("emergency_equipment_data_id", db.Integer, db.ForeignKey('emergency_equipment_data.id'))
-    emergency_equipment_data = db.relationship('EmergencyEquipmentData', uselist=False, back_populates='flight_plan', cascade='all, delete-orphan')
+    emergency_equipment_data = db.relationship('EmergencyEquipmentData', back_populates='flight_plan', cascade='all, delete-orphan', uselist=False, single_parent=True)
     remarks:bool = db.Column("remarks", db.Boolean, nullable=False, default=False)
     remarks_details:str = db.Column("remarks_details", db.String(256), nullable=False)
     pilot_id:int = db.Column("pilot_id", db.Integer, db.ForeignKey("pilots.id"))

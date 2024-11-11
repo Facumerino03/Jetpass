@@ -9,7 +9,7 @@ class EmergencyEquipmentData(db.Model):
     __tablename__ = "emergency_equipment_data"
     
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
-    flight_plan = db.relationship('FlightPlan', back_populates='emergency_equipment_data')
+    flight_plan = db.relationship('FlightPlan', back_populates='emergency_equipment_data', uselist=False)
     
     # Radio Equipment
     radio_uhf:bool = db.Column("radio_uhf", db.Boolean, nullable=False, default=False)  

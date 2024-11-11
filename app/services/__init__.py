@@ -5,3 +5,4 @@ from .security_manager import Security
 from .message import Message, MessageBuilder
 from .pilot_services import PilotServices
 from .airport_services import AirportServices
+from .aircraft_services import AircraftServices
