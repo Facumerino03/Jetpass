@@ -10,13 +10,7 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Upd
         db.session.add(flightplan)
         db.session.commit()
         return flightplan
-      
-    def find_all(self) -> List[FlightPlan]:
-        return FlightPlan.query.all()
-
-    def find_by(self, **kargs) -> List[FlightPlan]:
-        return FlightPlan.query.filter_by(**kargs).all()
-        
+    
     def find(self, id: int) -> FlightPlan:
         result = None
         if id is not None:
@@ -25,6 +19,12 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Upd
             except Exception as e:
                 logging.error(f'error getting flight plan by id: {id}, {e}') 
         return result
+    
+    def find_all(self) -> List[FlightPlan]:
+        return FlightPlan.query.all()
+    
+    def find_by(self, **kargs) -> List[FlightPlan]:
+        return FlightPlan.query.filter_by(**kargs).all()
     
     def delete(self, flightplan: FlightPlan) -> None:
         existing_flightplan = self.find(flightplan.id)
