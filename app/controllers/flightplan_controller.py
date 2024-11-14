@@ -1,7 +1,7 @@
 import logging
 from flask import Blueprint, request
 from app.mapping import FlightPlanSchema
-from app.services import FlightPlanServices
+from app.services import FlightPlanServices, FlightPlanFormatterService
 from app.utils import build_response
 from app.validators import validate_with
 
@@ -17,8 +17,11 @@ def get_flightplan(id: int):
         logging.info(f'FlightPlan not found id: {id}')
         return build_response('FlightPlan not found', code=404)
     
+    flightplan_data = flightplan_map.dump(flightplan)
+    formatted_flightplan = FlightPlanFormatterService.format_for_response(flightplan_data)
+    
     logging.info(f'FlightPlan found id: {id}')
-    return build_response('FlightPlan found', data=flightplan_map.dump(flightplan))
+    return build_response('FlightPlan found', data=formatted_flightplan)
 
 @flightplan_bp.route('/flightplans', methods=['GET'])
 def get_all_flightplans():
@@ -28,8 +31,11 @@ def get_all_flightplans():
         logging.info('No flightplans found')
         return build_response('No flightplans found', code=404)
     
+    flightplan_data = flightplan_map.dump(flightplans, many=True)
+    formatted_flightplans = [FlightPlanFormatterService.format_for_response(flightplan) for flightplan in flightplan_data]
+    
     logging.info('FlightPlans found')
-    return build_response('FlightPlans found', data={'flightplans': flightplan_map.dump(flightplans, many=True)})
+    return build_response('FlightPlans found', data={'flightplans': formatted_flightplans})
 
 @flightplan_bp.route('/flightplans/create', methods=['POST'])
 @validate_with(FlightPlanSchema)
@@ -45,25 +51,26 @@ def post_flightplan():
         logging.error(f'Error saving flightplan: {e}')
         return build_response(str(e), code=400)
 
-@flightplan_bp.route('/flightplans/<int:id>', methods=['PUT'])
-@validate_with(FlightPlanSchema)
-def update_flightplan(id: int):
-    flightplan_data = flightplan_map.load(request.json)
-    flightplan_dict = flightplan_map.dump(flightplan_data)
+# @flightplan_bp.route('/flightplans/<int:id>', methods=['PUT'])
+# @validate_with(FlightPlanSchema)
+# def update_flightplan(id: int):
+#     flightplan_data = flightplan_map.load(request.json)
+#     flightplan_dict = flightplan_map.dump(flightplan_data)
     
-    existing_flightplan = flightplan_services.find(id)
-    if existing_flightplan is None:
-        logging.info(f'FlightPlan not found id: {id}')
-        return build_response('FlightPlan not found', code=404)
+#     existing_flightplan = flightplan_services.find(id)
+#     if existing_flightplan is None:
+#         logging.info(f'FlightPlan not found id: {id}')
+#         return build_response('FlightPlan not found', code=404)
     
-    try:
-        updated_flightplan = flightplan_services.update(flightplan_dict, id)
-        logging.info(f'FlightPlan updated id: {id}')
-        return build_response('FlightPlan updated', data=flightplan_map.dump(updated_flightplan))
+#     try:
+#         updated_flightplan = flightplan_services.update(flightplan_dict, id)
+#         logging.info(f'FlightPlan updated id: {id}')
+#         return build_response('FlightPlan updated', data=flightplan_map.dump(updated_flightplan))
     
-    except ValueError as e:
-        logging.error(f'Error updating flightplan: {e}')
-        return build_response(str(e), code=400)
+#     except ValueError as e:
+#         logging.error(f'Error updating flightplan: {e}')
+#         return build_response(str(e), code=400)
+#         # End of Selection
 
 @flightplan_bp.route('/flightplans/<int:id>', methods=['DELETE'])
 def delete_flightplan(id: int):

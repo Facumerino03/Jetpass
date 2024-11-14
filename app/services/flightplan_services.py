@@ -1,8 +1,10 @@
 from app.repositories import FlightPlanRepository, PilotRepository, AircraftRepository, AirportRepository
 from app.models import FlightPlan, Pilot, Aircraft, Airport
 from app.services.emergency_equipment_data_services import EmergencyEquipmentDataServices
+from app.services.aerodrome_availability_service import AerodromeAvailabilityService
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
+from marshmallow import ValidationError
 
 class FlightPlanServices:
     """Clase que se encarga del CRUD de los planes de vuelo"""
@@ -13,8 +15,37 @@ class FlightPlanServices:
         self.pilot_repository = PilotRepository()
         self.aircraft_repository = AircraftRepository()
         self.airport_repository = AirportRepository()
+        self.aerodrome_availability_service = AerodromeAvailabilityService()
 
     def save(self, flightplan_data: dict) -> FlightPlan:
+        # Verificar disponibilidad del aeródromo de salida
+        existing_departure = self.aerodrome_availability_service.check_departure_aerodrome_availability(
+            flightplan_data['departure_aerodrome_id'],
+            flightplan_data['departure_date'],
+            flightplan_data['departure_time']
+        )
+        if existing_departure:
+            raise ValidationError(
+                f"Departure aerodrome {flightplan_data['departure_aerodrome_id']} is not available at {flightplan_data['departure_time']}"
+            )
+
+        # Verificar disponibilidad de aeródromos de destino
+        for aerodrome_id in [
+            flightplan_data['destination_aerodrome_id'],
+            flightplan_data['first_alternative_aerodrome_id'],
+            flightplan_data['second_alternative_aerodrome_id']
+        ]:
+            existing_destination = self.aerodrome_availability_service.check_destination_aerodrome_availability(
+                aerodrome_id,
+                flightplan_data['departure_date'],
+                flightplan_data['departure_time'],
+                flightplan_data['total_estimated_elapsed_time']
+            )
+            if existing_destination:
+                raise ValidationError(
+                    f"Destination aerodrome {aerodrome_id} is not available at estimated arrival time"
+                )
+
         # Crear los modelos relacionados
         emergency_equipment_data = self.emergency_equipment_data_services.save(flightplan_data['emergency_equipment_data'])
         pilot = self.pilot_repository.find(flightplan_data['pilot_id'])
@@ -26,7 +57,7 @@ class FlightPlanServices:
 
         # Crear el FlightPlan
         flightplan = FlightPlan(
-            submission_date=flightplan_data['submission_date'],
+            submission_date=datetime.now(),
             priority=flightplan_data['priority'],
             address_to=flightplan_data['address_to'],
             filing_time=flightplan_data['filing_time'],
@@ -38,6 +69,7 @@ class FlightPlanServices:
             number_of_aircraft=flightplan_data['number_of_aircraft'],
             pilot_id=pilot.id,
             departure_aerodrome_id=departure_aerodrome.id,
+            departure_date=flightplan_data['departure_date'],
             departure_time=flightplan_data['departure_time'],
             cruising_speed=flightplan_data['cruising_speed'],
             cruising_level=flightplan_data['cruising_level'],
