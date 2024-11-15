@@ -3,6 +3,13 @@ from functools import wraps
 from marshmallow import ValidationError #type: ignore
 
 def validate_with(schema):
+    '''
+    Validates the request body with the given schema
+    param:
+        schema: Schema
+    return:
+        decorator
+    '''
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):

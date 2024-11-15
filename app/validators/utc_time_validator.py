@@ -1,4 +1,4 @@
-from marshmallow import ValidationError
+from marshmallow import ValidationError # type: ignore
 from datetime import time
 import re
 
@@ -6,6 +6,12 @@ def validate_utc_time(value: str) -> time:
     '''
     Validates the UTC time format.
     It should be in UTC format HHMM.
+    
+    param:
+        value: str
+    return:
+        ValidationError (if the format is invalid)
+        time (if the format is valid)
     '''
     pattern = re.compile(r'^[0-2][0-9][0-5][0-9]$')
     if not pattern.match(value):

@@ -9,8 +9,8 @@ if __name__ == "__main__":
 '''
 Server Startup
 Ref: Book Flask Web Development Page 9
-host = "0.0.0.0" hace referencia a que recibe peticiones desde cualquier IP
-port = 5000 hace referencia al puerto en el que se ejecutará el servidor
-debug = True hace referencia a que se ejecutará en modo debug, es decir, si hay un error, se mostrará en la consola
+host = "0.0.0.0" makes the server receive requests from any IP
+port = 5000 makes reference to the port where the server will run
+debug = True makes the server run in debug mode, that is, if there is an error, it will be displayed in the console
 '''
 

@@ -3,7 +3,7 @@ import os
 from flask_marshmallow import Marshmallow # type: ignore
 from flask_migrate import Migrate # type: ignore
 from flask_sqlalchemy import SQLAlchemy # type: ignore
-from app.route import RouteApp
+from app.route import RouteApp # type: ignore
 from app.config import config
 from app.routes import Route
 
