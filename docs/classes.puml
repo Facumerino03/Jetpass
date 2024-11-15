@@ -1,0 +1,136 @@
+@startuml classes
+
+enum WakeTurbulenceCategoryEnum {
+    LIGHT
+    MEDIUM
+    HEAVY
+}
+
+enum FlightRulesEnum {
+    IFR
+    VFR
+    Y
+    Z
+}
+
+enum FlightTypeEnum {
+    S
+    N
+    G
+    M
+    X
+}
+
+class User {
+    - id: int
+    - firstname: str
+    - lastname: str
+    - dni: str
+    - email: str
+    - phone: str
+    - address: str
+    - state: str
+    - city: str
+    - zipcode: str
+    - password: str
+}
+
+class Aircraft {
+    - id: int
+    - aircraft_identification: str
+    - aircraft_type: str
+    - wake_turbulence_category: WakeTurbulenceCategoryEnum
+    - equipment: str
+    - endurance: Time
+    - passenger_capacity: str
+    - crew_capacity: int
+    - max_speed: str
+    - aircraft_colour_and_marking: str
+}
+
+class FlightPlan {
+    - id: int
+    - submission_date: datetime
+    - priority: str
+    - address_to: str
+    - filing_time: Time
+    - originator: str
+    - message_type: str
+    - aircraft_id: int
+    - flight_rules: FlightRulesEnum
+    - flight_type: FlightTypeEnum
+    - number_of_aircraft: int
+    - pilot_id: int
+    - departure_aerodrome_id: int
+    - departure_date: datetime
+    - departure_time: Time
+    - cruising_speed: str
+    - cruising_level: str
+    - route: str
+    - destination_aerodrome_id: int
+    - total_estimated_elapsed_time: Time
+    - first_alternative_aerodrome_id: int
+    - second_alternative_aerodrome_id: int
+    - other_information: str
+    - persons_on_board: int
+    - emergency_equipment_data_id: int
+    - remarks: bool
+    - remarks_details: str
+    - filled_by_user_id: int
+    - document_signature_filename: str
+}
+
+class EmergencyEquipmentData {
+    - id: int
+    - flight_plan_id: int
+    - radio_uhf: bool
+    - radio_vhf: bool
+    - radio_elt: bool
+    - survival_equipment: bool
+    - survival_polar: bool
+    - survival_desert: bool
+    - survival_maritime: bool
+    - survival_jungle: bool
+    - jackets: bool
+    - jackets_lights: bool
+    - jackets_fluorescein: bool
+    - jackets_radio_uhf: bool
+    - jackets_radio_vhf: bool
+    - dinghies: int
+    - dinghies_number: int
+    - dinghies_capacity: int
+    - dinghies_cover: bool
+    - dinghies_cover_colour: str
+}
+
+class Pilot {
+    - id: int
+    - first_name: str
+    - last_name: str
+    - license_number: str
+}
+
+class Airport {
+    - id: int
+    - name: str
+    - airport_code: str
+    - city: str
+    - country: str
+    - south_coordinates: float
+    - west_coordinates: float
+    - latitude: float
+    - elevation: float
+    - runway_length: float
+    - traffic_type_allowed: TrafficTypeAllowedEnum
+}
+
+FlightPlan "0..n" --> "1" User: filled_by
+FlightPlan "0..n" --> "1" Aircraft: uses
+FlightPlan "0..n" --> "1" Pilot: uses
+FlightPlan "1" --* "1" EmergencyEquipmentData: contains
+FlightPlan "0..n" --> "4" Airport: uses
+Aircraft "1" --> "1" WakeTurbulenceCategoryEnum
+FlightPlan "1" --> "1" FlightRulesEnum
+FlightPlan "1" --> "1" FlightTypeEnum
+
+@enduml
