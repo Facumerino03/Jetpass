@@ -7,6 +7,7 @@ from typing import List
 from datetime import datetime, timedelta
 from marshmallow import ValidationError
 from app.services.entity_validation_service import EntityValidationService
+from app.handlers.validation_result import ValidationResult
 
 class FlightPlanServices:
     """Clase que se encarga del CRUD de los planes de vuelo"""
@@ -22,16 +23,19 @@ class FlightPlanServices:
         self.entity_validation_service = EntityValidationService()
 
     def save(self, flightplan_data: dict) -> FlightPlan:
+        validation_result = ValidationResult.success()
         
         # Validar existencia de entidades
-        self.entity_validation_service.validate_entities_exist(flightplan_data)
+        entity_validation = self.entity_validation_service.validate_entities_exist(flightplan_data)
+        validation_result = validation_result.merge(entity_validation)
         
         # Validar disponibilidad de aeródromos
-        self.aerodrome_availability_service.check_departure_aerodrome_availability(
+        departure_validation = self.aerodrome_availability_service.check_departure_aerodrome_availability(
             flightplan_data['departure_aerodrome_id'],
             flightplan_data['departure_date'],
             flightplan_data['departure_time']
         )
+        validation_result = validation_result.merge(departure_validation)
         
         # Validar aeródromos de destino y alternativos
         aerodromes = [
@@ -39,26 +43,32 @@ class FlightPlanServices:
             flightplan_data['first_alternative_aerodrome_id'],
             flightplan_data['second_alternative_aerodrome_id']
         ]
-        self.aerodrome_availability_service.check_alternative_aerodromes_availability(
+        alternative_validation = self.aerodrome_availability_service.check_alternative_aerodromes_availability(
             aerodromes,
             flightplan_data['departure_date'],
             flightplan_data['departure_time'],
             flightplan_data['total_estimated_elapsed_time']
         )
-
+        validation_result = validation_result.merge(alternative_validation)
+        
         # Validar reglas de aeronave
-        self.aircraft_rules_services.check_capacity(
+        capacity_validation = self.aircraft_rules_services.check_capacity(
             flightplan_data['aircraft_id'],
             flightplan_data['persons_on_board']
         )
+        validation_result = validation_result.merge(capacity_validation)
         
-        self.aircraft_rules_services.check_aircraft_availability(
+        availability_validation = self.aircraft_rules_services.check_aircraft_availability(
             flightplan_data['aircraft_id'],
             flightplan_data['departure_date'],
             flightplan_data['departure_time'],
             flightplan_data['total_estimated_elapsed_time']
         )
-
+        validation_result = validation_result.merge(availability_validation)
+        
+        # Si hay errores de validación, lanzar excepción
+        validation_result.raise_if_invalid()
+        
         # Crear los modelos relacionados
         emergency_equipment_data = self.emergency_equipment_data_services.save(flightplan_data['emergency_equipment_data'])
         pilot = self.pilot_repository.find(flightplan_data['pilot_id'])
