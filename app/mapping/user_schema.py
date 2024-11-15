@@ -18,7 +18,7 @@ class UserSchema(Schema):
     password:str = fields.String(load_only=True)
     
     @post_load
-    def bind_user(self, data, **kwargs) -> User:
+    def bind_user(self, data: dict, **kwargs) -> User:
         '''
         Bind data to an User model
         params:
