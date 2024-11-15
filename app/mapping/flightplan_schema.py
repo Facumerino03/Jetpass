@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, post_load, validate
+from marshmallow import Schema, fields, post_load # type: ignore
 from app.models import FlightPlan
 from app.models.enums import FlightRulesEnum, FlightTypeEnum
 from app.utils import EnumField
@@ -6,6 +6,9 @@ from app.mapping.emergency_equipment_data_schema import EmergencyEquipmentDataSc
 from app.validators import validate_speed_format, validate_cruising_level, validate_utc_time
 
 class FlightPlanSchema(Schema):
+    '''
+    FlightPlan schema for validation and serialization
+    '''
     id = fields.Integer(dump_only=True)
     submission_date = fields.DateTime(dump_only=True)
     priority = fields.String(required=True)
@@ -38,5 +41,12 @@ class FlightPlanSchema(Schema):
     emergency_equipment_data = fields.Nested(EmergencyEquipmentDataSchema, required=True)
 
     @post_load
-    def make_flightplan(self, data, **kwargs):
+    def make_flightplan(self, data, **kwargs) -> FlightPlan:
+        '''
+        Bind data to an FlightPlan model
+        params:
+            data: Dict
+        returns:
+            FlightPlan
+        '''
         return FlightPlan(**data)

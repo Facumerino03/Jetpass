@@ -4,6 +4,9 @@ from app.models.enums import TrafficTypeAllowedEnum
 from app.utils import EnumField
 
 class AirportSchema(Schema):
+    '''
+    Airport schema for validation and serialization
+    '''
     id = fields.Integer(dump_only=True)
     name = fields.String(required=True)
     airport_code = fields.String(required=True, validate=validate.Length(max=4))
@@ -17,5 +20,12 @@ class AirportSchema(Schema):
     traffic_type_allowed = EnumField(TrafficTypeAllowedEnum, required=True)
 
     @post_load
-    def bind_airport(self, data, **kwargs):
+    def bind_airport(self, data, **kwargs) -> Airport:
+        '''
+        Bind data to an Airport model
+        params:
+            data: Dict
+        returns:
+            Airport
+        '''
         return Airport(**data)

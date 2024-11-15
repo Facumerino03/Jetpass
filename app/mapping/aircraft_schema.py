@@ -5,6 +5,9 @@ from app.utils import EnumField
 from app.validators import validate_speed_format
 
 class AircraftSchema(Schema):
+    '''
+    Aircraft schema for validation and serialization
+    '''
     id = fields.Integer(dump_only=True)
     aircraft_identification = fields.String(required=True, validate=validate.Length(max=7))
     aircraft_type = fields.String(required=True, validate=validate.Length(max=4))
@@ -17,5 +20,12 @@ class AircraftSchema(Schema):
     aircraft_colour_and_marking = fields.String(required=True)
 
     @post_load
-    def bind_aircraft(self, data, **kwargs):
+    def bind_aircraft(self, data, **kwargs) -> Aircraft:
+        '''
+        Bind data to an Aircraft model
+        params:
+            data: Dict
+        returns:
+            Aircraft
+        '''
         return Aircraft(**data)

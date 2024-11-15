@@ -2,7 +2,9 @@ from marshmallow import Schema, fields, validate, post_load #type: ignore
 from app.models import User
 
 class UserSchema(Schema):
-
+    '''
+    User schema for validation and serialization
+    '''
     id:int = fields.Integer(dump_only=True)
     firstname:str = fields.String(required=True)
     lastname:str = fields.String(required=True)
@@ -16,5 +18,12 @@ class UserSchema(Schema):
     password:str = fields.String(load_only=True)
     
     @post_load
-    def bind_user(self, data, **kwargs):
+    def bind_user(self, data, **kwargs) -> User:
+        '''
+        Bind data to an User model
+        params:
+            data: Dict
+        returns:
+            User
+        '''
         return User(**data)

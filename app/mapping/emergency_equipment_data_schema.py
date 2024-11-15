@@ -1,7 +1,10 @@
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load # type: ignore
 from app.models import EmergencyEquipmentData
 
 class EmergencyEquipmentDataSchema(Schema):
+    '''
+    EmergencyEquipmentData schema for validation and serialization
+    '''
     id = fields.Integer(dump_only=True)
     radio_uhf = fields.Boolean(required=True)
     radio_vhf = fields.Boolean(required=True)
@@ -23,5 +26,12 @@ class EmergencyEquipmentDataSchema(Schema):
     dinghies_cover_colour = fields.String(required=True)
 
     @post_load
-    def make_emergency_equipment_data(self, data, **kwargs):
+    def make_emergency_equipment_data(self, data, **kwargs) -> EmergencyEquipmentData:
+        '''
+        Bind data to an EmergencyEquipmentData model
+        params:
+            data: Dict
+        returns:
+            EmergencyEquipmentData
+        '''
         return EmergencyEquipmentData(**data)
