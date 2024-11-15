@@ -58,23 +58,3 @@ class AerodromeAvailabilityService:
                 'destination_aerodrome',
                 f"Error al procesar las fechas: {str(e)}"
             )
-
-    def check_alternative_aerodromes_availability(self, aerodromes: list, departure_date: str, 
-                                                departure_time: str, total_estimated_elapsed_time: str) -> None:
-        """
-        Verifica la disponibilidad de los aeródromos alternativos
-        """
-        validation_result = ValidationResult.success()
-        
-        for aerodrome_id in aerodromes:
-            result = self.check_destination_aerodrome_availability(
-                aerodrome_id,
-                departure_date,
-                departure_time,
-                total_estimated_elapsed_time
-            )
-        
-            if not result.is_valid:
-                validation_result = validation_result.merge(result)
-        
-        return validation_result

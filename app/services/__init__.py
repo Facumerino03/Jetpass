@@ -11,3 +11,4 @@ from .flightplan_services import FlightPlanServices
 from .aerodrome_availability_service import AerodromeAvailabilityService
 from .data_time_formatter import FlightPlanFormatterService
 from .entity_validation_service import EntityValidationService
+from .speed_converter import SpeedConverter
