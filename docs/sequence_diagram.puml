@@ -1,0 +1,79 @@
+@startuml secuencia
+
+actor User
+boundary FlightPlanResource
+participant FlightPlanSchema
+participant FlightPlanServices
+participant ValidationResult
+participant EntityValidationService
+participant AerodromeAvailabilityService
+participant AircraftRulesServices
+participant SpeedRulesService
+participant EmergencyEquipmentDataServices
+database Repositories
+
+User -> FlightPlanResource: POST /flightplan (Request)
+activate FlightPlanResource
+
+FlightPlanResource -> FlightPlanSchema: load(json)
+activate FlightPlanSchema
+note right: Valida formato de datos\n(speed, time, etc)
+FlightPlanResource <-- FlightPlanSchema: flightplan_data
+deactivate FlightPlanSchema
+
+FlightPlanResource -> FlightPlanServices: save(flightplan_data)
+activate FlightPlanServices
+
+' Validaciones
+FlightPlanServices -> EntityValidationService: validate_entities_exist()
+activate EntityValidationService
+EntityValidationService -> Repositories: find()
+EntityValidationService <-- Repositories: entities
+FlightPlanServices <-- EntityValidationService: validation_result
+deactivate EntityValidationService
+
+FlightPlanServices -> AerodromeAvailabilityService: check_departure_aerodrome_availability()
+activate AerodromeAvailabilityService
+AerodromeAvailabilityService -> Repositories: find_by_departure()
+AerodromeAvailabilityService <-- Repositories: existing_plan
+FlightPlanServices <-- AerodromeAvailabilityService: validation_result
+deactivate AerodromeAvailabilityService
+
+FlightPlanServices -> AircraftRulesServices: check_capacity()
+activate AircraftRulesServices
+AircraftRulesServices -> Repositories: find()
+AircraftRulesServices <-- Repositories: aircraft
+FlightPlanServices <-- AircraftRulesServices: validation_result
+deactivate AircraftRulesServices
+
+FlightPlanServices -> SpeedRulesService: check_max_speed()
+activate SpeedRulesService
+SpeedRulesService -> Repositories: find()
+SpeedRulesService <-- Repositories: aircraft
+FlightPlanServices <-- SpeedRulesService: validation_result
+deactivate SpeedRulesService
+
+' Creación de entidades relacionadas
+FlightPlanServices -> EmergencyEquipmentDataServices: save()
+activate EmergencyEquipmentDataServices
+EmergencyEquipmentDataServices -> Repositories: save()
+EmergencyEquipmentDataServices <-- Repositories: emergency_data
+FlightPlanServices <-- EmergencyEquipmentDataServices: emergency_data
+deactivate EmergencyEquipmentDataServices
+
+' Guardado final
+FlightPlanServices -> Repositories: save(flightplan)
+FlightPlanServices <-- Repositories: saved_flightplan
+
+FlightPlanResource <-- FlightPlanServices: flightplan
+deactivate FlightPlanServices
+
+FlightPlanResource -> FlightPlanSchema: dump(flightplan)
+activate FlightPlanSchema
+FlightPlanResource <-- FlightPlanSchema: json
+deactivate FlightPlanSchema
+
+User <-- FlightPlanResource: json (Response)
+deactivate FlightPlanResource
+
+@enduml

@@ -1,0 +1,92 @@
+@startuml
+actor Admin 
+boundary ClienteResource
+boundary ClientesResource
+participant ClienteSchema
+entity ClienteModel
+database data
+Admin -> ClienteResource: GET by Id (Request)
+activate ClienteResource
+ClienteResource -> ClienteModel: get_or_404()
+activate ClienteModel
+ClienteModel -> data: query (SELECT)
+ClienteModel <- data: Registro
+ClienteSchema <- ClienteModel: Objeto cliente
+deactivate ClienteModel
+activate ClienteSchema
+ClienteResource <- ClienteSchema: Json cliente
+deactivate ClienteSchema
+Admin <- ClienteResource: json (Response)
+deactivate ClienteResource
+Admin -> ClienteResource: PUT by id (Request)
+activate ClienteResource
+ClienteResource -> ClienteModel: get_or_404()
+activate ClienteModel
+ClienteModel -> data: query (SELECT)
+ClienteModel <- data: Registro
+ClienteResource <- ClienteModel: Objeto cliente
+deactivate ClienteModel
+ClienteResource -> ClienteModel: Add
+activate ClienteModel
+ClienteResource -> ClienteModel: Commit
+ClienteModel -> data: UPDATE
+ClienteModel <- data: Registro
+ClienteSchema <- ClienteModel: Objeto Cliente
+deactivate ClienteModel
+activate ClienteSchema
+ClienteResource <- ClienteSchema: Json Cliente
+deactivate ClienteSchema
+Admin <- ClienteResource: json (Response)
+deactivate ClienteResource
+
+Admin -> ClienteResource: DELETE by id (Request)
+activate ClienteResource
+ClienteResource -> ClienteModel: get_or_404()
+activate ClienteModel
+ClienteModel -> data: query (SELECT)
+ClienteModel <- data: Registro
+ClienteResource <- ClienteModel
+deactivate ClienteModel
+ClienteResource -> ClienteModel: delete
+activate ClienteModel
+ClienteResource -> ClienteModel: Commit
+ClienteModel -> data: DELETE
+deactivate ClienteModel
+Admin <- ClienteResource: Request(Status 204)
+deactivate ClienteResource
+
+Admin -> ClientesResource: GET by Id (Request)
+activate ClientesResource
+ClientesResource -> ClienteModel: all
+activate ClienteModel
+ClienteModel -> data: Select
+ClienteModel <- data: Registros
+ClienteSchema <- ClienteModel: Coleccion de objetos
+deactivate ClienteModel
+activate ClienteSchema
+ClientesResource <- ClienteSchema: dump many=True
+deactivate ClienteSchema
+Admin <- ClientesResource: coleccion de json
+deactivate ClientesResource
+
+Admin -> ClientesResource: Post 
+activate ClientesResource
+ClientesResource -> ClienteSchema: load json
+activate ClienteSchema
+ClientesResource <- ClienteSchema: objeto cliente
+deactivate ClienteSchema
+ClientesResource -> ClienteModel: add
+activate ClienteModel
+ClientesResource -> ClienteModel: commit
+ClienteModel -> data: insert
+ClienteModel <- data: registro Id
+ClienteSchema <- ClienteModel: objeto
+deactivate ClienteModel
+activate ClienteSchema
+ClientesResource <- ClienteSchema: json
+deactivate ClienteSchema
+Admin <- ClientesResource: json
+deactivate ClientesResource
+
+
+@enduml
