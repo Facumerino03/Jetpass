@@ -1,9 +1,11 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from passlib.hash import pbkdf2_sha256
+from passlib.hash import pbkdf2_sha256 # type: ignore
 from abc import ABC, abstractmethod
 
-#No puede instanciarse
 class AbstractSecurity(ABC):
+    '''
+    Abstract class that handles the security
+    '''
         
     @abstractmethod
     def encrypt_password(self, password:str) -> str:
@@ -14,6 +16,9 @@ class AbstractSecurity(ABC):
         pass
     
 class WerkzeugSecurity(AbstractSecurity):
+    '''
+    Class that handles the security using werkzeug
+    '''
     
     def encrypt_password(self, password:str) -> str:
         password_encrypted = generate_password_hash(password)
@@ -23,6 +28,9 @@ class WerkzeugSecurity(AbstractSecurity):
         return check_password_hash(password_encrypted, plain_password)
     
 class PasslibSecurity(AbstractSecurity):
+    '''
+    Class that handles the security using passlib
+    '''
     
     def encrypt_password(self, password:str) -> str:
         password_encrypted = pbkdf2_sha256.hash(password)

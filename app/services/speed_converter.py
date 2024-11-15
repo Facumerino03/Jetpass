@@ -1,21 +1,29 @@
 from typing import Tuple
 
 class SpeedConverter:
+    '''
+    Class that handles the speed conversion
+    '''
+    
     @staticmethod
     def parse_speed(speed: str) -> Tuple[str, float]:
-        """
-        Parsea una velocidad en formato N#### o K####
-        Retorna una tupla con (unidad, valor numérico)
-        """
+        '''
+        Parses a speed in the format N#### or K####
+        Returns a tuple with (unit, numeric value)
+        
+        param:
+            speed: str
+        return:
+            Tuple[str, float]
+        '''
         if not speed or len(speed) != 5:
-            raise ValueError("Formato de velocidad inválido")
+            raise ValueError("Invalid speed format")
             
         unit = speed[0].upper()
         if unit not in ['N', 'K']:
             raise ValueError(f"Unidad de velocidad no soportada: {unit}")
             
         try:
-            # Extraer los dígitos y convertirlos a float
             digits = speed[1:]
             value = float(digits)
             return unit, value
@@ -24,7 +32,14 @@ class SpeedConverter:
 
     @staticmethod
     def convert_to_knots(speed: str) -> float:
-        """Convierte cualquier formato de velocidad a nudos"""
+        '''
+        Converts any speed format to knots
+        
+        param:
+            speed: str
+        return:
+            float
+        '''
         unit, value = SpeedConverter.parse_speed(speed)
         
         if unit == 'N':

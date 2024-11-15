@@ -3,14 +3,24 @@ from app.repositories import AircraftRepository
 from app.handlers.validation_result import ValidationResult
 
 class SpeedRulesService:
+    '''
+    Class that handles the speed rules
+    '''
+    
     def __init__(self):
         self.aircraft_repository = AircraftRepository()
         self.speed_converter = SpeedConverter()
     
     def check_max_speed(self, aircraft_id: int, cruising_speed: str) -> ValidationResult:
-        """
-        Verifica que la velocidad de crucero no exceda la velocidad máxima de la aeronave
-        """
+        '''
+        Checks that the cruising speed does not exceed the maximum speed of the aircraft
+        
+        param:
+            aircraft_id: int
+            cruising_speed: str
+        return:
+            ValidationResult
+        '''
         try:
             aircraft = self.aircraft_repository.find(aircraft_id)
             if not aircraft:
@@ -20,7 +30,6 @@ class SpeedRulesService:
                 )
             
             try:
-                # Convertir ambas velocidades a nudos
                 cruising_speed_knots = self.speed_converter.convert_to_knots(cruising_speed)
                 max_speed_knots = self.speed_converter.convert_to_knots(aircraft.max_speed)
                 

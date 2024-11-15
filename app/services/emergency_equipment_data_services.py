@@ -1,14 +1,22 @@
-from typing import List
 from app.models import EmergencyEquipmentData
 from app.repositories import EmergencyEquipmentDataRepository
 
 class EmergencyEquipmentDataServices:
-    """Clase que se encarga del CRUD de los datos de equipo de emergencia"""
-    
+    '''
+    Class that handles the CRUD of the emergency equipment data
+    '''
     def __init__(self):
         self.repository = EmergencyEquipmentDataRepository()
 
     def save(self, equipment_data: dict) -> EmergencyEquipmentData:
+        '''
+        Saves the emergency equipment data
+        
+        param:
+            equipment_data: dict
+        return:
+            EmergencyEquipmentData
+        '''
         emergency_equipment_data = EmergencyEquipmentData(
             radio_uhf=equipment_data['radio_uhf'],
             radio_vhf=equipment_data['radio_vhf'],
@@ -32,4 +40,12 @@ class EmergencyEquipmentDataServices:
         return self.repository.save(emergency_equipment_data)
 
     def find(self, id: int) -> EmergencyEquipmentData:
+        '''
+        Finds the emergency equipment data by its id
+        
+        param:
+            id: int
+        return:
+            EmergencyEquipmentData
+        '''
         return self.repository.find(id)

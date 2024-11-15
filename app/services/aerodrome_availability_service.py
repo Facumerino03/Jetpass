@@ -1,14 +1,25 @@
 from datetime import datetime, timedelta, time
 from app.repositories import FlightPlanRepository
-from app.models import FlightPlan
-from marshmallow import ValidationError
 from app.handlers.validation_result import ValidationResult
 
 class AerodromeAvailabilityService:
+    '''
+    Class that checks the availability of the departure and destination aerodromes
+    '''
     def __init__(self):
         self.flightplan_repository = FlightPlanRepository()
     
     def check_departure_aerodrome_availability(self, departure_aerodrome_id: int, departure_date: str, departure_time: str) -> ValidationResult:
+        '''
+        Checks the availability of the departure aerodrome
+        
+        param:
+            departure_aerodrome_id: int
+            departure_date: str
+            departure_time: str
+        return:
+            ValidationResult
+        '''
         try:
             parsed_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
             parsed_time = datetime.strptime(departure_time, '%H%M').time()
@@ -27,7 +38,19 @@ class AerodromeAvailabilityService:
                 'departure_aerodrome',
                 f"Error al procesar las fechas: {str(e)}"
             )
+    
     def check_destination_aerodrome_availability(self, aerodrome_id: int, departure_date: str, departure_time: str, total_estimated_elapsed_time: str) -> ValidationResult:
+        '''
+        Checks the availability of the destination aerodrome
+        
+        param:
+            aerodrome_id: int
+            departure_date: str
+            departure_time: str
+            total_estimated_elapsed_time: str
+        return:
+            ValidationResult
+        '''
         try:
             parsed_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
             parsed_time = datetime.strptime(departure_time, '%H%M').time()
