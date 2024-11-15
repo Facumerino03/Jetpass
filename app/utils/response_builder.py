@@ -1,9 +1,15 @@
 from app.mapping import MessageSchema
-from app.services import Message, MessageBuilder
+from app.services import MessageBuilder
 
 def build_response(message: str, data=None, code=200):
     '''
     Build a response with a message, data and a status code
+    param:
+        message: str
+        data: any
+        code: int
+    return:
+        tuple: A tuple with the message and the status code
     '''
     message_schema = MessageSchema()
     message_builder = MessageBuilder()

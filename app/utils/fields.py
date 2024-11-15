@@ -1,6 +1,9 @@
 from marshmallow import fields, ValidationError #type: ignore
 
 class EnumField(fields.Field):
+    '''
+    Class representing the enum field for marshmallow
+    '''
     def __init__(self, enum_cls, *args, **kwargs):
         self.enum_cls = enum_cls
         super().__init__(*args, **kwargs)
