@@ -19,7 +19,7 @@ class FlightPlanSchema(Schema):
     number_of_aircraft = fields.Integer(required=True)
     pilot_id = fields.Integer(required=True)
     departure_aerodrome_id = fields.Integer(required=True)
-    departure_date = fields.Date(required=True, format='%d-%m-%Y')
+    departure_date = fields.Date(required=True, format='%Y-%m-%d')
     departure_time = fields.String(required=True, validate=validate_utc_time)
     cruising_speed = fields.String(required=True, validate=validate_speed_format)
     cruising_level = fields.String(required=True, validate=validate_cruising_level)

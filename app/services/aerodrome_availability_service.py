@@ -10,7 +10,7 @@ class AerodromeAvailabilityService:
         """
         Verifica si hay otro plan de vuelo usando el mismo aeródromo de salida en la misma fecha y hora
         """
-        parsed_date = datetime.strptime(departure_date, '%d-%m-%Y').date()
+        parsed_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
         parsed_time = datetime.strptime(departure_time, '%H%M').time()
         
         existing_plan = self.flightplan_repository.find_by_departure(departure_aerodrome_id, parsed_date, parsed_time)
@@ -20,7 +20,7 @@ class AerodromeAvailabilityService:
         """
         Verifica si hay otro plan de vuelo usando el aeródromo como destino en el lapso de tiempo estimado
         """
-        parsed_date = datetime.strptime(departure_date, '%d-%m-%Y').date()
+        parsed_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
         parsed_time = datetime.strptime(departure_time, '%H%M').time()
         parsed_elapsed = datetime.strptime(total_estimated_elapsed_time, '%H:%M').time()
         
