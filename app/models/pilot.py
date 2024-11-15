@@ -3,9 +3,9 @@ from app import db
 
 @dataclass(init=True,eq=False)
 class Pilot(db.Model):
-    """
+    '''
     Class representing pilots in the flight plans
-    """
+    '''
     __tablename__ = "pilots"
     
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)

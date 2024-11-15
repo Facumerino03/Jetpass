@@ -1,13 +1,13 @@
 from dataclasses import dataclass
-from sqlalchemy import Enum
+from sqlalchemy import Enum # type: ignore
 from app import db
 from app.models.enums import TrafficTypeAllowedEnum
 
 @dataclass(init=True,eq=False)
 class Airport(db.Model):
-    """
-    Clase que representa los aeropuertos disponibles para los planes de vuelo
-    """
+    '''
+    Class representing the airports available for flight plans
+    '''
     __tablename__ = "airports"
     
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)

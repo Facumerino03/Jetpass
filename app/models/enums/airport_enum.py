@@ -1,6 +1,9 @@
 from enum import Enum
 
 class TrafficTypeAllowedEnum(Enum):
+    '''
+    Traffic type allowed
+    '''
     TRANSOCEANIC = "Transoceanic"
     TRANSCONTINENTAL = "Transcontinental"
     INTERNATIONAL = "International"

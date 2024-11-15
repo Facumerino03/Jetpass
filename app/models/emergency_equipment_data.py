@@ -3,13 +3,13 @@ from app import db
 
 @dataclass(init=True,eq=False)
 class EmergencyEquipmentData(db.Model):
-    """
+    '''
     Class representing emergency equipment data in the flight plans
-    """
+    '''
     __tablename__ = "emergency_equipment_data"
     
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
-    flight_plan = db.relationship('FlightPlan', back_populates='emergency_equipment_data', uselist=False)
+    flight_plan:int = db.relationship('FlightPlan', back_populates='emergency_equipment_data', uselist=False)
     
     # Radio Equipment
     radio_uhf:bool = db.Column("radio_uhf", db.Boolean, nullable=False, default=False)  
@@ -40,6 +40,7 @@ class EmergencyEquipmentData(db.Model):
     def __eq__(self, equipment: object) -> bool:
         return (
             self.id == equipment.id and
+            self.flight_plan == equipment.flight_plan and
             self.radio_uhf == equipment.radio_uhf and
             self.radio_vhf == equipment.radio_vhf and
             self.radio_elt == equipment.radio_elt and

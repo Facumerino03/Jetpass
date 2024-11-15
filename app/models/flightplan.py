@@ -1,14 +1,14 @@
 from dataclasses import dataclass
 from datetime import date
-from sqlalchemy import Enum, Time
+from sqlalchemy import Enum, Time # type: ignore
 from app import db
 from app.models.enums import FlightRulesEnum, FlightTypeEnum
 
 @dataclass(init=True,eq=False)
 class FlightPlan(db.Model):
-    """
+    '''
     Class representing the flight plans and its attributes
-    """
+    '''
     __tablename__ = "flight_plans"
     
     id:int = db.Column("id", db.Integer, primary_key=True, autoincrement=True)
@@ -18,24 +18,24 @@ class FlightPlan(db.Model):
     filing_time:Time = db.Column("filing_time", db.Time, nullable=False)
     originator:str = db.Column("originator", db.String(8), nullable=False)
     message_type:str = db.Column("message_type", db.String(100), nullable=False, default="FPL")
-    aircraft_id = db.Column("aircraft_id", db.Integer, db.ForeignKey("aircrafts.id"))
-    flight_rules = db.Column("flight_rules", Enum(FlightRulesEnum), nullable=False)
-    flight_type = db.Column("flight_type", Enum(FlightTypeEnum), nullable=False)
+    aircraft_id:int = db.Column("aircraft_id", db.Integer, db.ForeignKey("aircrafts.id"))
+    flight_rules:str = db.Column("flight_rules", Enum(FlightRulesEnum), nullable=False)
+    flight_type:str = db.Column("flight_type", Enum(FlightTypeEnum), nullable=False)
     number_of_aircraft:int = db.Column("number_of_aircraft", db.Integer, nullable=False)
     pilot_id:int = db.Column("pilot_id", db.Integer, db.ForeignKey("pilots.id"))
     departure_aerodrome_id:int = db.Column("departure_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
-    departure_date = db.Column("departure_date", db.DateTime, nullable=False)
-    departure_time: Time = db.Column("departure_time", db.Time, nullable=False)
-    cruising_speed = db.Column("cruising_speed", db.String(5), nullable=False)
-    cruising_level = db.Column("cruising_level", db.String(5), nullable=False)
+    departure_date:date = db.Column("departure_date", db.DateTime, nullable=False)
+    departure_time:Time = db.Column("departure_time", db.Time, nullable=False)
+    cruising_speed:str = db.Column("cruising_speed", db.String(5), nullable=False)
+    cruising_level:str = db.Column("cruising_level", db.String(5), nullable=False)
     route:str = db.Column("route", db.String(100), nullable=False)
     destination_aerodrome_id:int = db.Column("destination_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
-    total_estimated_elapsed_time = db.Column("total_estimated_elapsed_time", db.Time, nullable=False)
+    total_estimated_elapsed_time:Time = db.Column("total_estimated_elapsed_time", db.Time, nullable=False)
     first_alternative_aerodrome_id:int = db.Column("first_alternative_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
     second_alternative_aerodrome_id:int = db.Column("second_alternative_aerodrome_id", db.Integer, db.ForeignKey("airports.id"))
     other_information:str = db.Column("other_information", db.String(256), nullable=False)
     persons_on_board:int = db.Column("persons_on_board", db.Integer, nullable=False)
-    emergency_equipment_data_id: int = db.Column("emergency_equipment_data_id", db.Integer, db.ForeignKey('emergency_equipment_data.id'))
+    emergency_equipment_data_id:int = db.Column("emergency_equipment_data_id", db.Integer, db.ForeignKey('emergency_equipment_data.id'))
     emergency_equipment_data = db.relationship('EmergencyEquipmentData', back_populates='flight_plan', cascade='all, delete-orphan', uselist=False, single_parent=True)
     remarks:bool = db.Column("remarks", db.Boolean, nullable=False, default=False)
     remarks_details:str = db.Column("remarks_details", db.String(256), nullable=False)
