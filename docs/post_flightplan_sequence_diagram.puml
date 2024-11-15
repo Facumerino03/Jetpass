@@ -1,4 +1,4 @@
-@startuml secuencia
+@startuml post_flightplan_sequence_diagram
 
 actor User
 boundary FlightPlanController
@@ -11,6 +11,7 @@ participant AircraftRulesServices
 participant SpeedRulesService
 participant EmergencyEquipmentDataServices
 database Repositories
+participant UserEntity
 participant Aircraft
 participant Pilot
 participant Airport
@@ -37,13 +38,23 @@ deactivate FlightPlanSchema
 FlightPlanController -> FlightPlanServices: save(flightplan_data)
 activate FlightPlanServices
 
-' Validaciones
 FlightPlanServices -> ValidationResult: success()
+note right of ValidationResult
+  ValidationResult (Collector Pattern):
+  - Recolecta errores de diferentes validaciones
+  - Mantiene estado de validación (is_valid)
+  - Permite combinar resultados (merge)
+  - Punto único para decidir continuar/detener
+  - Acumula mensajes de error
+  - Si hay error, detiene la ejecución llamando un raise_if_invalid() (no se procede con la creación del FlightPlan)
+end note
 FlightPlanServices <-- ValidationResult: validation_result
 
 FlightPlanServices -> EntityValidationService: validate_entities_exist()
 activate EntityValidationService
 EntityValidationService -> Repositories: find()
+Repositories -> UserEntity: find(filled_by_user_id)
+Repositories <-- UserEntity: user
 Repositories -> Aircraft: find(aircraft_id)
 Repositories <-- Aircraft: aircraft
 Repositories -> Pilot: find(pilot_id)
@@ -82,10 +93,8 @@ SpeedRulesService <-- Repositories: aircraft
 FlightPlanServices <-- SpeedRulesService: validation_result
 deactivate SpeedRulesService
 
-' Validación final
 FlightPlanServices -> ValidationResult: raise_if_invalid()
 
-' Creación de entidades relacionadas
 FlightPlanServices -> EmergencyEquipmentDataServices: save()
 activate EmergencyEquipmentDataServices
 EmergencyEquipmentDataServices -> Repositories: save()
@@ -96,7 +105,6 @@ EmergencyEquipmentDataServices <-- Repositories: emergency_data
 FlightPlanServices <-- EmergencyEquipmentDataServices: emergency_data
 deactivate EmergencyEquipmentDataServices
 
-' Obtención de entidades relacionadas
 FlightPlanServices -> Repositories: find()
 Repositories -> Pilot: find(pilot_id)
 Repositories <-- Pilot: pilot
@@ -111,9 +119,15 @@ Repositories <-- Airport: first_alternative_aerodrome
 Repositories -> Airport: find(second_alternative_aerodrome_id)
 Repositories <-- Airport: second_alternative_aerodrome
 
-' Guardado final
 FlightPlanServices -> Repositories: save(flightplan)
 Repositories -> FlightPlan: new()
+note right
+  Patrón de Creación y Persistencia:
+  - new(): Crea una nueva instancia en memoria
+  - instance: Objeto creado pero aún no persistido
+  - save(): Persiste el objeto en la base de datos
+  - El Repository maneja la creación y persistencia
+end note
 Repositories <-- FlightPlan: instance
 Repositories -> FlightPlan: save()
 FlightPlanServices <-- Repositories: saved_flightplan

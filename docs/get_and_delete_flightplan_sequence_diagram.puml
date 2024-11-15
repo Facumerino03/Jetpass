@@ -1,0 +1,80 @@
+@startuml get_and_delete_flightplan_sequence_diagram
+
+actor User
+boundary FlightPlanController
+participant FlightPlanSchema
+participant FlightPlanServices
+participant FlightPlanFormatterService
+database Repositories
+participant FlightPlan
+
+' GET /flightplans/{id}
+User -> FlightPlanController: GET /flightplan/{id} (Request)
+activate FlightPlanController
+
+FlightPlanController -> FlightPlanServices: find(id)
+activate FlightPlanServices
+FlightPlanServices -> Repositories: find(id)
+Repositories -> FlightPlan: find()
+Repositories <-- FlightPlan: instance
+FlightPlanServices <-- Repositories: flightplan
+deactivate FlightPlanServices
+
+FlightPlanController -> FlightPlanSchema: dump(flightplan)
+activate FlightPlanSchema
+FlightPlanController <-- FlightPlanSchema: flightplan_data
+deactivate FlightPlanSchema
+
+FlightPlanController -> FlightPlanFormatterService: format_for_response(flightplan_data)
+FlightPlanController <-- FlightPlanFormatterService: formatted_flightplan
+
+User <-- FlightPlanController: Response(200, formatted_flightplan)
+deactivate FlightPlanController
+
+' GET /flightplans
+User -> FlightPlanController: GET /flightplans (Request)
+activate FlightPlanController
+
+FlightPlanController -> FlightPlanServices: find_all()
+activate FlightPlanServices
+FlightPlanServices -> Repositories: find_all()
+Repositories -> FlightPlan: find_all()
+Repositories <-- FlightPlan: instances
+FlightPlanServices <-- Repositories: flightplans
+deactivate FlightPlanServices
+
+FlightPlanController -> FlightPlanSchema: dump(flightplans, many=True)
+activate FlightPlanSchema
+FlightPlanController <-- FlightPlanSchema: flightplans_data
+deactivate FlightPlanSchema
+
+loop for each flightplan in flightplans_data
+    FlightPlanController -> FlightPlanFormatterService: format_for_response(flightplan)
+    FlightPlanController <-- FlightPlanFormatterService: formatted_flightplan
+end
+
+User <-- FlightPlanController: Response(200, formatted_flightplans)
+deactivate FlightPlanController
+
+' DELETE /flightplans/{id}
+User -> FlightPlanController: DELETE /flightplan/{id} (Request)
+activate FlightPlanController
+
+FlightPlanController -> FlightPlanServices: find(id)
+activate FlightPlanServices
+FlightPlanServices -> Repositories: find(id)
+Repositories -> FlightPlan: find()
+Repositories <-- FlightPlan: instance
+FlightPlanServices <-- Repositories: flightplan
+deactivate FlightPlanServices
+
+FlightPlanController -> FlightPlanServices: delete(id)
+activate FlightPlanServices
+FlightPlanServices -> Repositories: delete(flightplan)
+FlightPlanServices <-- Repositories: success
+deactivate FlightPlanServices
+
+User <-- FlightPlanController: Response(200, "FlightPlan deleted")
+deactivate FlightPlanController
+
+@enduml
