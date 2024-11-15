@@ -1,7 +1,7 @@
 @startuml secuencia
 
 actor User
-boundary FlightPlanResource
+boundary FlightPlanController
 participant FlightPlanSchema
 participant FlightPlanServices
 participant ValidationResult
@@ -11,23 +11,45 @@ participant AircraftRulesServices
 participant SpeedRulesService
 participant EmergencyEquipmentDataServices
 database Repositories
+participant Aircraft
+participant Pilot
+participant Airport
+participant EmergencyEquipmentData
+participant FlightPlan
 
-User -> FlightPlanResource: POST /flightplan (Request)
-activate FlightPlanResource
+User -> FlightPlanController: POST /flightplan (Request)
+activate FlightPlanController
 
-FlightPlanResource -> FlightPlanSchema: load(json)
+FlightPlanController -> FlightPlanSchema: load(json)
 activate FlightPlanSchema
-note right: Valida formato de datos\n(speed, time, etc)
-FlightPlanResource <-- FlightPlanSchema: flightplan_data
+note right
+  Marshmallow (Deserialización):
+  - Valida tipos de datos
+  - Valida formatos (speed, time, etc)
+  - Convierte JSON a objetos Python
+  - Valida campos requeridos
+  - Valida enums
+  - Ejecuta @post_load para crear instancias
+end note
+FlightPlanController <-- FlightPlanSchema: flightplan_data
 deactivate FlightPlanSchema
 
-FlightPlanResource -> FlightPlanServices: save(flightplan_data)
+FlightPlanController -> FlightPlanServices: save(flightplan_data)
 activate FlightPlanServices
 
 ' Validaciones
+FlightPlanServices -> ValidationResult: success()
+FlightPlanServices <-- ValidationResult: validation_result
+
 FlightPlanServices -> EntityValidationService: validate_entities_exist()
 activate EntityValidationService
 EntityValidationService -> Repositories: find()
+Repositories -> Aircraft: find(aircraft_id)
+Repositories <-- Aircraft: aircraft
+Repositories -> Pilot: find(pilot_id)
+Repositories <-- Pilot: pilot
+Repositories -> Airport: find(aerodrome_ids)
+Repositories <-- Airport: airports
 EntityValidationService <-- Repositories: entities
 FlightPlanServices <-- EntityValidationService: validation_result
 deactivate EntityValidationService
@@ -46,6 +68,13 @@ AircraftRulesServices <-- Repositories: aircraft
 FlightPlanServices <-- AircraftRulesServices: validation_result
 deactivate AircraftRulesServices
 
+FlightPlanServices -> AircraftRulesServices: check_aircraft_availability()
+activate AircraftRulesServices
+AircraftRulesServices -> Repositories: find()
+AircraftRulesServices <-- Repositories: aircraft
+FlightPlanServices <-- AircraftRulesServices: validation_result
+deactivate AircraftRulesServices
+
 FlightPlanServices -> SpeedRulesService: check_max_speed()
 activate SpeedRulesService
 SpeedRulesService -> Repositories: find()
@@ -53,27 +82,59 @@ SpeedRulesService <-- Repositories: aircraft
 FlightPlanServices <-- SpeedRulesService: validation_result
 deactivate SpeedRulesService
 
+' Validación final
+FlightPlanServices -> ValidationResult: raise_if_invalid()
+
 ' Creación de entidades relacionadas
 FlightPlanServices -> EmergencyEquipmentDataServices: save()
 activate EmergencyEquipmentDataServices
 EmergencyEquipmentDataServices -> Repositories: save()
+Repositories -> EmergencyEquipmentData: new()
+Repositories <-- EmergencyEquipmentData: instance
+Repositories -> EmergencyEquipmentData: save()
 EmergencyEquipmentDataServices <-- Repositories: emergency_data
 FlightPlanServices <-- EmergencyEquipmentDataServices: emergency_data
 deactivate EmergencyEquipmentDataServices
 
+' Obtención de entidades relacionadas
+FlightPlanServices -> Repositories: find()
+Repositories -> Pilot: find(pilot_id)
+Repositories <-- Pilot: pilot
+Repositories -> Aircraft: find(aircraft_id)
+Repositories <-- Aircraft: aircraft
+Repositories -> Airport: find(departure_aerodrome_id)
+Repositories <-- Airport: departure_aerodrome
+Repositories -> Airport: find(destination_aerodrome_id)
+Repositories <-- Airport: destination_aerodrome
+Repositories -> Airport: find(first_alternative_aerodrome_id)
+Repositories <-- Airport: first_alternative_aerodrome
+Repositories -> Airport: find(second_alternative_aerodrome_id)
+Repositories <-- Airport: second_alternative_aerodrome
+
 ' Guardado final
 FlightPlanServices -> Repositories: save(flightplan)
+Repositories -> FlightPlan: new()
+Repositories <-- FlightPlan: instance
+Repositories -> FlightPlan: save()
 FlightPlanServices <-- Repositories: saved_flightplan
 
-FlightPlanResource <-- FlightPlanServices: flightplan
+FlightPlanController <-- FlightPlanServices: flightplan
 deactivate FlightPlanServices
 
-FlightPlanResource -> FlightPlanSchema: dump(flightplan)
+FlightPlanController -> FlightPlanSchema: dump(flightplan)
 activate FlightPlanSchema
-FlightPlanResource <-- FlightPlanSchema: json
+note right
+  Marshmallow (Serialización):
+  - Convierte objetos Python a JSON
+  - Aplica reglas de serialización
+  - Excluye campos load_only
+  - Incluye campos dump_only
+  - Formatea datos según schema
+end note
+FlightPlanController <-- FlightPlanSchema: json
 deactivate FlightPlanSchema
 
-User <-- FlightPlanResource: json (Response)
-deactivate FlightPlanResource
+User <-- FlightPlanController: json (Response)
+deactivate FlightPlanController
 
 @enduml

@@ -1,5 +1,6 @@
 import logging
 from flask import Blueprint, request
+from flask import Response
 from app.mapping import AirportSchema
 from app.services import AirportServices
 from app.utils import build_response
@@ -10,7 +11,14 @@ airport_map = AirportSchema()
 airport_services = AirportServices()
 
 @airport_bp.route('/airport/<int:id>', methods=['GET'])
-def get_airport(id: int):
+def get_airport(id: int) -> Response:
+    '''
+    Get an airport by its id
+    params:
+        id: int
+    returns:
+        Response
+    '''
     airport = airport_services.find(id)
     
     if airport is None:
@@ -21,7 +29,12 @@ def get_airport(id: int):
     return build_response('Airport found', data=airport_map.dump(airport))
 
 @airport_bp.route('/airports', methods=['GET'])
-def get_all_airports():
+def get_all_airports() -> Response:
+    '''
+    Get all airports
+    returns:
+        Response
+    '''
     airports = airport_services.find_all()
     
     if not airports:
@@ -33,8 +46,14 @@ def get_all_airports():
 
 @airport_bp.route('/airports/create', methods=['POST'])
 @validate_with(AirportSchema)
-def post_airport():
+def post_airport() -> Response:
+    '''
+    Create an airport
+    returns:
+        Response
+    '''
     airport = airport_map.load(request.json)
+    
     try:
         airport_saved = airport_services.save(airport)
         logging.info(f'Airport saved id: {airport_saved.id}')
@@ -46,10 +65,17 @@ def post_airport():
 
 @airport_bp.route('/airport/<int:id>', methods=['PUT'])
 @validate_with(AirportSchema)
-def update_airport(id: int):
+def update_airport(id: int) -> Response :
+    '''
+    Update an airport
+    params:
+        id: int
+    returns:
+        Response
+    '''
     airport = airport_map.load(request.json)
-    
     existing_airport = airport_services.find(id)
+    
     if existing_airport is None:
         logging.info(f'Airport not found id: {id}')
         return build_response('Airport not found', code=404)
@@ -64,7 +90,14 @@ def update_airport(id: int):
         return build_response(str(e), code=400)
 
 @airport_bp.route('/airport/<int:id>', methods=['DELETE'])
-def delete_airport(id:int):
+def delete_airport(id:int) -> Response:
+    '''
+    Delete an airport
+    params:
+        id: int
+    returns:
+        Response
+    '''
     airport = airport_services.find(id)
     
     if airport is None:

@@ -1,5 +1,5 @@
 import logging
-from flask import Blueprint, request
+from flask import Blueprint, request, Response
 from app.mapping import PilotSchema
 from app.services import PilotServices
 from app.utils import build_response
@@ -10,7 +10,14 @@ pilot_map = PilotSchema()
 pilot_services = PilotServices()
 
 @pilot_bp.route('/pilot/<int:id>', methods=['GET'])
-def get_pilot(id: int):
+def get_pilot(id: int) -> Response:
+    '''
+    Get a pilot by its id
+    params:
+        id: int
+    returns:
+        Response
+    '''
     pilot = pilot_services.find(id)
     
     if pilot is None:
@@ -21,7 +28,12 @@ def get_pilot(id: int):
     return build_response('Pilot found', data=pilot_map.dump(pilot))
 
 @pilot_bp.route('/pilots', methods=['GET'])
-def get_all_pilots():
+def get_all_pilots() -> Response:
+    '''
+    Get all pilots
+    returns:
+        Response
+    '''
     pilots = pilot_services.find_all()
     
     if not pilots:
@@ -33,22 +45,36 @@ def get_all_pilots():
 
 @pilot_bp.route('/pilots/create', methods=['POST'])
 @validate_with(PilotSchema)
-def post_pilot():
+def post_pilot() -> Response:
+    '''
+    Create a pilot
+    returns:
+        Response
+    '''
     pilot = pilot_map.load(request.json)
+    
     try:
         pilot_saved = pilot_services.save(pilot)
         logging.info(f'Pilot saved id: {pilot_saved.id}')
         return build_response('Pilot saved', data=pilot_map.dump(pilot_saved), code=201)
+   
     except ValueError as e:
         logging.error(f'Error saving pilot: {e}')
         return build_response(str(e), code=400)
 
 @pilot_bp.route('/pilot/<int:id>', methods=['PUT'])
 @validate_with(PilotSchema)
-def update_pilot(id: int):
+def update_pilot(id: int) -> Response:
+    '''
+    Update a pilot
+    params:
+        id: int
+    returns:
+        Response
+    '''
     pilot = pilot_map.load(request.json)
-    
     existing_pilot = pilot_services.find(id)
+    
     if existing_pilot is None:
         logging.info(f'Pilot not found id: {id}')
         return build_response('Pilot not found', code=404)
@@ -63,7 +89,14 @@ def update_pilot(id: int):
         return build_response(str(e), code=400)
 
 @pilot_bp.route('/pilot/<int:id>', methods=['DELETE'])
-def delete_pilot(id:int):
+def delete_pilot(id:int) -> Response:
+    '''
+    Delete a pilot
+    params:
+        id: int
+    returns:
+        Response
+    '''
     pilot = pilot_services.find(id)
     
     if pilot is None:

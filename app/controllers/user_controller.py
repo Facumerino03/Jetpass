@@ -1,5 +1,5 @@
 import logging
-from flask import Blueprint, request
+from flask import Blueprint, request, Response
 from app.mapping import UserSchema
 from app.services import UserServices
 from app.utils import build_response
@@ -10,7 +10,14 @@ user_map = UserSchema()
 user_services = UserServices()
 
 @user_bp.route('/user/<int:id>', methods=['GET'])
-def get_user(id: int):
+def get_user(id: int) -> Response:
+    '''
+    Get a user by its id
+    params:
+        id: int
+    returns:
+        Response
+    '''
     user = user_services.find(id)
     
     if user is None:
@@ -21,7 +28,12 @@ def get_user(id: int):
     return build_response('User found', data=user_map.dump(user))
 
 @user_bp.route('/users', methods=['GET'])
-def get_all_users():
+def get_all_users() -> Response:
+    '''
+    Get all users
+    returns:
+        Response
+    '''
     users = user_services.find_all()
     
     if not users:
@@ -33,22 +45,36 @@ def get_all_users():
 
 @user_bp.route('/users/create', methods=['POST'])
 @validate_with(UserSchema)
-def post_user():
+def post_user() -> Response:
+    '''
+    Create a user
+    returns:
+        Response
+    '''
     user = user_map.load(request.json)
+    
     try:
         user_saved = user_services.save(user)
         logging.info(f'User saved id: {user_saved.id}')
         return build_response('User saved', data=user_map.dump(user_saved), code=201)
+    
     except ValueError as e:
         logging.error(f'Error saving user: {e}')
         return build_response(str(e), code=400)
 
 @user_bp.route('/user/<int:id>', methods=['PUT'])
 @validate_with(UserSchema)
-def update_user(id: int):
+def update_user(id: int) -> Response:
+    '''
+    Update a user
+    params:
+        id: int
+    returns:
+        Response
+    '''
     user = user_map.load(request.json)
-    
     existing_user = user_services.find(id)
+    
     if existing_user is None:
         logging.info(f'User not found id: {id}')
         return build_response('User not found', code=404)
@@ -63,7 +89,14 @@ def update_user(id: int):
         return build_response(str(e), code=400)
 
 @user_bp.route('/user/<int:id>', methods=['DELETE'])
-def delete_user(id:int):
+def delete_user(id:int) -> Response:
+    '''
+    Delete a user
+    params:
+        id: int
+    returns:
+        Response
+    '''
     user = user_services.find(id)
     
     if user is None:

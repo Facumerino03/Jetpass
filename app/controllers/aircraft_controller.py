@@ -1,5 +1,6 @@
 import logging
 from flask import Blueprint, request
+from flask import Response
 from app.mapping import AircraftSchema
 from app.services import AircraftServices
 from app.utils import build_response
@@ -10,7 +11,14 @@ aircraft_map = AircraftSchema()
 aircraft_services = AircraftServices()
 
 @aircraft_bp.route('/aircraft/<int:id>', methods=['GET'])
-def get_aircraft(id: int):
+def get_aircraft(id: int) -> Response:
+    '''
+    Get an aircraft by its id
+    params:
+        id: int
+    returns:
+        Response
+    '''
     aircraft = aircraft_services.find(id)
     
     if aircraft is None:
@@ -21,7 +29,12 @@ def get_aircraft(id: int):
     return build_response('Aircraft found', data=aircraft_map.dump(aircraft))
 
 @aircraft_bp.route('/aircrafts', methods=['GET'])
-def get_all_aircrafts():
+def get_all_aircrafts() -> Response:
+    '''
+    Get all aircrafts
+    returns:
+        Response
+    '''
     aircrafts = aircraft_services.find_all()
     
     if not aircrafts:
@@ -33,7 +46,12 @@ def get_all_aircrafts():
 
 @aircraft_bp.route('/aircrafts/create', methods=['POST'])
 @validate_with(AircraftSchema)
-def post_aircraft():
+def post_aircraft() -> Response:
+    '''
+    Create an aircraft
+    returns:
+        Response
+    '''
     aircraft = aircraft_map.load(request.json)
     try:
         aircraft_saved = aircraft_services.save(aircraft)
@@ -46,10 +64,17 @@ def post_aircraft():
 
 @aircraft_bp.route('/aircraft/<int:id>', methods=['PUT'])
 @validate_with(AircraftSchema)
-def update_aircraft(id: int):
+def update_aircraft(id: int) -> Response:
+    '''
+    Update an aircraft
+    params:
+        id: int
+    returns:
+        Response
+    '''
     aircraft = aircraft_map.load(request.json)
-    
     existing_aircraft = aircraft_services.find(id)
+    
     if existing_aircraft is None:
         logging.info(f'Aircraft not found id: {id}')
         return build_response('Aircraft not found', code=404)
@@ -64,7 +89,14 @@ def update_aircraft(id: int):
         return build_response(str(e), code=400)
 
 @aircraft_bp.route('/aircraft/<int:id>', methods=['DELETE'])
-def delete_aircraft(id: int):
+def delete_aircraft(id: int) -> Response:
+    '''
+    Delete an aircraft
+    params:
+        id: int
+    returns:
+        Response
+    '''
     aircraft = aircraft_services.find(id)
     
     if aircraft is None:
