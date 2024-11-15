@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 from app import db
-from flask_sqlalchemy import model
+from flask_sqlalchemy import model # type: ignore
 
 class CreateAbstractRepository(ABC):
     @abstractmethod

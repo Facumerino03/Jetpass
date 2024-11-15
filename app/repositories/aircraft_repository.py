@@ -1,13 +1,22 @@
 import logging
 from typing import List
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError # type: ignore
 from app.models import Aircraft
 from app import db
 from app.repositories.base_repository import CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository
 
 class AircraftRepository(CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository):
-    
+    '''
+    Class representing the aircrafts repository (interacts with the database)
+    '''
     def save(self, aircraft: Aircraft) -> Aircraft:
+        '''
+        Saves an aircraft to the database
+        param:
+            aircraft: Aircraft
+        return:
+            Aircraft: The saved aircraft
+        '''
         try:
             db.session.add(aircraft)
             db.session.commit()
@@ -18,12 +27,31 @@ class AircraftRepository(CreateAbstractRepository, ReadAbstractRepository, Updat
         return aircraft
       
     def find_all(self) -> List[Aircraft]:
+        '''
+        Finds all aircrafts
+        return:
+            List[Aircraft]: The list of aircrafts found
+        '''
         return Aircraft.query.all()
 
     def find_by(self, **kargs) -> List[Aircraft]:
+        '''
+        Finds aircrafts by a given criteria
+        param:
+            kargs: dict
+        return:
+            List[Aircraft]: The list of aircrafts found
+        '''
         return Aircraft.query.filter_by(**kargs).all()
         
     def find(self, id: int) -> Aircraft:
+        '''
+        Finds an aircraft by its id
+        param:
+            id: int
+        return:
+            Aircraft: The aircraft found
+        '''
         result = None
         if id is not None:
             try:
@@ -33,6 +61,11 @@ class AircraftRepository(CreateAbstractRepository, ReadAbstractRepository, Updat
         return result
     
     def delete(self, aircraft: Aircraft) -> None:
+        '''
+        Deletes an aircraft from the database
+        param:
+            aircraft: Aircraft
+        '''
         existing_aircraft = self.find(aircraft.id)
         if existing_aircraft:
             db.session.delete(existing_aircraft)
@@ -41,6 +74,13 @@ class AircraftRepository(CreateAbstractRepository, ReadAbstractRepository, Updat
             logging.error(f'error deleting user by id: {aircraft.id}')
     
     def update(self, aircraft: Aircraft) -> Aircraft:
+        '''
+        Updates an aircraft in the database
+        param:
+            aircraft: Aircraft
+        return:
+            Aircraft: The updated aircraft
+        '''
         existing_aircraft = self.find(aircraft.id)
         
         if existing_aircraft is None:

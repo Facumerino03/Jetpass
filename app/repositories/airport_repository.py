@@ -1,4 +1,4 @@
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError # type: ignore
 import logging
 from typing import List
 from app.models import Airport
@@ -6,8 +6,17 @@ from app import db
 from app.repositories.base_repository import CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository
 
 class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository):
-    
+    '''
+    Class representing the airports repository (interacts with the database)
+    '''
     def save(self, airport: Airport) -> Airport:
+        '''
+        Saves an airport to the database
+        param:
+            airport: Airport
+        return:
+            Airport: The saved airport
+        '''
         try:
             db.session.add(airport)
             db.session.commit()
@@ -18,12 +27,31 @@ class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, Update
         return airport
       
     def find_all(self) -> List[Airport]:
+        '''
+        Finds all airports
+        return:
+            List[Airport]: The list of airports found
+        '''
         return Airport.query.all()
 
     def find_by(self, **kargs) -> List[Airport]:
+        '''
+        Finds airports by a given criteria
+        param:
+            kargs: dict
+        return:
+            List[Airport]: The list of airports found
+        '''
         return Airport.query.filter_by(**kargs).all()
         
     def find(self, id: int) -> Airport:
+        '''
+        Finds an airport by its id
+        param:
+            id: int
+        return:
+            Airport: The airport found
+        '''
         result = None
         if id is not None:
             try:
@@ -33,6 +61,11 @@ class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, Update
         return result
     
     def delete(self, airport: Airport) -> None:
+        '''
+        Deletes an airport from the database
+        param:
+            airport: Airport
+        '''
         existing_airport = self.find(airport.id)
         if existing_airport:
             db.session.delete(existing_airport)
@@ -41,6 +74,14 @@ class AirportRepository(CreateAbstractRepository, ReadAbstractRepository, Update
             logging.error(f'error deleting airport by id: {airport.id}')
     
     def update(self, airport: Airport, id: int) -> Airport:
+        '''
+        Updates an airport in the database
+        param:
+            airport: Airport
+            id: int
+        return:
+            Airport: The updated airport
+        '''
         existing_airport = self.find(id)
         
         if existing_airport is None:

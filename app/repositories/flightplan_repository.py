@@ -1,19 +1,35 @@
-from datetime import datetime, time
-from sqlalchemy import and_, or_, func, Time
+from datetime import datetime
+from sqlalchemy import and_, or_, func, Time # type: ignore
 import logging
 from typing import List
 from app.models import FlightPlan
 from app import db
-from app.repositories.base_repository import CreateAbstractRepository, ReadAbstractRepository, UpdateAbstractRepository, DeleteAbstractRepository
+from app.repositories.base_repository import CreateAbstractRepository, ReadAbstractRepository, DeleteAbstractRepository
 
 class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, DeleteAbstractRepository):
-    
+    '''
+    Class representing the flight plans repository (interacts with the database)
+    '''
     def save(self, flightplan: FlightPlan) -> FlightPlan:
+        '''
+        Saves a flight plan to the database
+        param:
+            flightplan: FlightPlan
+        return:
+            FlightPlan: The saved flight plan
+        '''
         db.session.add(flightplan)
         db.session.commit()
         return flightplan
     
     def find(self, id: int) -> FlightPlan:
+        '''
+        Finds a flight plan by its id
+        param:
+            id: int
+        return:
+            FlightPlan: The flight plan found
+        '''
         result = None
         if id is not None:
             try:
@@ -23,68 +39,62 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Del
         return result
     
     def find_all(self) -> List[FlightPlan]:
+        '''
+        Finds all flight plans
+        return:
+            List[FlightPlan]: The list of flight plans found
+        '''
         return FlightPlan.query.all()
     
     def find_by(self, **kargs) -> List[FlightPlan]:
+        '''
+        Finds flight plans by a given criteria
+        param:
+            kargs: dict
+        return:
+            List[FlightPlan]: The list of flight plans found
+        '''
         return FlightPlan.query.filter_by(**kargs).all()
     
     def delete(self, flightplan: FlightPlan) -> None:
+        '''
+        Deletes a flight plan from the database
+        param:
+            flightplan: FlightPlan
+        '''
         existing_flightplan = self.find(flightplan.id)
         if existing_flightplan:
             db.session.delete(existing_flightplan)
             db.session.commit()
         else:
             logging.error(f'error deleting flight plan by id: {flightplan.id}')
-    
-    # def update(self, flightplan: FlightPlan) -> FlightPlan:
-    #     existing_flightplan = self.find(flightplan.id)
-        
-    #     if existing_flightplan is None:
-    #         return None
-        
-    #     existing_flightplan.submission_date = flightplan.submission_date
-    #     existing_flightplan.priority = flightplan.priority
-    #     existing_flightplan.address_to = flightplan.address_to
-    #     existing_flightplan.filing_time = flightplan.filing_time
-    #     existing_flightplan.originator = flightplan.originator
-    #     existing_flightplan.message_type = flightplan.message_type
-    #     existing_flightplan.aircraft_id = flightplan.aircraft_id
-    #     existing_flightplan.flight_rules = flightplan.flight_rules
-    #     existing_flightplan.flight_type = flightplan.flight_type
-    #     existing_flightplan.number_of_aircraft = flightplan.number_of_aircraft
-    #     existing_flightplan.pilot_id = flightplan.pilot_id
-    #     existing_flightplan.departure_aerodrome_id = flightplan.departure_aerodrome_id
-    #     existing_flightplan.departure_date = flightplan.departure_date
-    #     existing_flightplan.departure_time = flightplan.departure_time
-    #     existing_flightplan.cruising_speed = flightplan.cruising_speed
-    #     existing_flightplan.cruising_level = flightplan.cruising_level
-    #     existing_flightplan.route = flightplan.route
-    #     existing_flightplan.destination_aerodrome_id = flightplan.destination_aerodrome_id
-    #     existing_flightplan.total_estimated_elapsed_time = flightplan.total_estimated_elapsed_time
-    #     existing_flightplan.first_alternative_aerodrome_id = flightplan.first_alternative_aerodrome_id
-    #     existing_flightplan.second_alternative_aerodrome_id = flightplan.second_alternative_aerodrome_id
-    #     existing_flightplan.other_information = flightplan.other_information
-    #     existing_flightplan.persons_on_board = flightplan.persons_on_board
-    #     existing_flightplan.emergency_equipment_data_id = flightplan.emergency_equipment_data_id
-    #     existing_flightplan.remarks = flightplan.remarks
-    #     existing_flightplan.remarks_details = flightplan.remarks_details
-    #     existing_flightplan.filled_by_user_id = flightplan.filled_by_user_id
-    #     existing_flightplan.document_signature_filename = flightplan.document_signature_filename
-        
-    #     db.session.commit()
-    #     return existing_flightplan
-    #     # End of Selection
 
     def find_by_departure(self, aerodrome_id: int, departure_date: datetime.date, departure_time: datetime.time) -> FlightPlan:
+        '''
+        Finds a flight plan by its departure aerodrome id, departure date and departure time
+        param:
+            aerodrome_id: int
+            departure_date: datetime.date
+            departure_time: datetime.time
+        return:
+            FlightPlan: The flight plan found
+        '''
         return FlightPlan.query.filter(
             FlightPlan.departure_aerodrome_id == aerodrome_id,
             FlightPlan.departure_date == departure_date,
             FlightPlan.departure_time == departure_time
     ).first()
     
-    def find_by_destination_in_timeframe(self, aerodrome_id: int, 
-                                       arrival_window_start: datetime,
-                                       arrival_window_end: datetime) -> list[FlightPlan]:
+    def find_by_destination_in_timeframe(self, aerodrome_id: int, arrival_window_start: datetime, arrival_window_end: datetime) -> list[FlightPlan]:
+        '''
+        Finds flight plans by its destination aerodrome id, arrival window start and arrival window end
+        param:
+            aerodrome_id: int
+            arrival_window_start: datetime
+            arrival_window_end: datetime
+        return:
+            list[FlightPlan]: The list of flight plans found
+        '''
         return FlightPlan.query.filter(
             or_(
                 FlightPlan.destination_aerodrome_id == aerodrome_id,
@@ -99,9 +109,15 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Del
         ).all()
 
     def find_by_aircraft_in_timeframe(self, aircraft_id: int, start_time: datetime, end_time: datetime) -> FlightPlan:
-        """
-        Busca planes de vuelo que usen una aeronave específica en un período de tiempo
-        """
+        '''
+        Finds flight plans by its aircraft id, start time and end time
+        param:
+            aircraft_id: int
+            start_time: datetime
+            end_time: datetime
+        return:
+            FlightPlan: The flight plan found
+        '''
         return FlightPlan.query.filter(
         FlightPlan.aircraft_id == aircraft_id,
         FlightPlan.departure_date + FlightPlan.departure_time >= start_time,
