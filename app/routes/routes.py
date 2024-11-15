@@ -1,6 +1,13 @@
 class Route():
-    
+    '''
+    Class representing the routes (interacts with the controllers)
+    '''
     def init_app(self, app):
+        '''
+        Initializes the routes
+        param:
+            app: Flask
+        '''
         self.app = app
         from app.controllers import user_bp
         app.register_blueprint(user_bp, url_prefix='/api/v1')
