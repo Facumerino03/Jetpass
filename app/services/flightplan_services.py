@@ -26,9 +26,10 @@ class FlightPlanServices:
     def save(self, flightplan_data: dict) -> FlightPlan:
         validation_result = ValidationResult.success()
         
-        # Validar existencia de entidades
+        # Validar existencia de entidades primero
         entity_validation = self.entity_validation_service.validate_entities_exist(flightplan_data)
-        validation_result = validation_result.merge(entity_validation)
+        if not entity_validation.is_valid:
+            entity_validation.raise_if_invalid()
         
         # Validar disponibilidad de aeródromo de salida
         departure_validation = self.aerodrome_availability_service.check_departure_aerodrome_availability(

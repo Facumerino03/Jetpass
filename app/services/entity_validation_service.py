@@ -9,21 +9,23 @@ class EntityValidationService:
     
     def validate_entities_exist(self, flightplan_data: dict) -> ValidationResult:
         """Valida que todas las entidades referenciadas existan"""
-        validation_result = ValidationResult.success()
+        errors = []
         
         # Validar piloto
-        if not self.pilot_repository.find(flightplan_data['pilot_id']):
-            validation_result.add_error(
+        pilot = self.pilot_repository.find(flightplan_data['pilot_id'])
+        if not pilot:
+            errors.append(ValidationResult.failure(
                 'pilot',
                 f"No existe un piloto con id {flightplan_data['pilot_id']}"
-            )
+            ))
         
         # Validar aeronave
-        if not self.aircraft_repository.find(flightplan_data['aircraft_id']):
-            validation_result.add_error(
+        aircraft = self.aircraft_repository.find(flightplan_data['aircraft_id'])
+        if not aircraft:
+            errors.append(ValidationResult.failure(
                 'aircraft',
                 f"No existe una aeronave con id {flightplan_data['aircraft_id']}"
-            )
+            ))
         
         # Validar aeródromos
         aerodromes = {
@@ -34,10 +36,18 @@ class EntityValidationService:
         }
         
         for field, aerodrome_id in aerodromes.items():
-            if not self.airport_repository.find(aerodrome_id):
-                validation_result.add_error(
+            aerodrome = self.airport_repository.find(aerodrome_id)
+            if not aerodrome:
+                errors.append(ValidationResult.failure(
                     field,
                     f"No existe un aeródromo con id {aerodrome_id}"
-                )
+                ))
         
-        return validation_result
+        # Si hay errores, combinarlos
+        if errors:
+            result = errors[0]
+            for error in errors[1:]:
+                result = result.merge(error)
+            return result
+            
+        return ValidationResult.success()
