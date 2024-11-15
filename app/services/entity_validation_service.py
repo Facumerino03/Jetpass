@@ -1,4 +1,4 @@
-from app.repositories import PilotRepository, AircraftRepository, AirportRepository
+from app.repositories import PilotRepository, AircraftRepository, AirportRepository, UserRepository
 from app.handlers.validation_result import ValidationResult
 
 class EntityValidationService:
@@ -9,6 +9,7 @@ class EntityValidationService:
         self.pilot_repository = PilotRepository()
         self.aircraft_repository = AircraftRepository()
         self.airport_repository = AirportRepository()
+        self.user_repository = UserRepository()
     
     def validate_entities_exist(self, flightplan_data: dict) -> ValidationResult:
         '''
@@ -21,6 +22,14 @@ class EntityValidationService:
         '''
         errors = []
         
+        # Validate user
+        user = self.user_repository.find(flightplan_data['filled_by_user_id'])
+        if not user:
+            errors.append(ValidationResult.failure(
+                'user',
+                f"No existe un usuario con id {flightplan_data['filled_by_user_id']}"
+            ))
+
         # Validate pilot
         pilot = self.pilot_repository.find(flightplan_data['pilot_id'])
         if not pilot:
