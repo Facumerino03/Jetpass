@@ -4,6 +4,8 @@ from app.mapping import FlightPlanSchema
 from app.services import FlightPlanServices, FlightPlanFormatterService
 from app.utils import build_response
 from app.validators import validate_with
+from app.handlers import ErrorHandler
+from marshmallow import ValidationError
 
 flightplan_bp = Blueprint('flightplan', __name__)
 flightplan_map = FlightPlanSchema()
@@ -47,6 +49,8 @@ def post_flightplan():
         logging.info(f'FlightPlan saved id: {flightplan_saved.id}')
         return build_response('FlightPlan saved', data=flightplan_map.dump(flightplan_saved), code=201)
     
+    except ValidationError as e:
+        return ErrorHandler.handle_validation_error(e)
     except ValueError as e:
         logging.error(f'Error saving flightplan: {e}')
         return build_response(str(e), code=400)

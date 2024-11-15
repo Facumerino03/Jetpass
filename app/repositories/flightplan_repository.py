@@ -97,3 +97,13 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Del
                 func.cast(FlightPlan.departure_time, Time) >= arrival_window_start.time()
             )
         ).all()
+
+    def find_by_aircraft_in_timeframe(self, aircraft_id: int, start_time: datetime, end_time: datetime) -> FlightPlan:
+        """
+        Busca planes de vuelo que usen una aeronave específica en un período de tiempo
+        """
+        return FlightPlan.query.filter(
+        FlightPlan.aircraft_id == aircraft_id,
+        FlightPlan.departure_date + FlightPlan.departure_time >= start_time,
+        FlightPlan.departure_date + FlightPlan.departure_time + FlightPlan.total_estimated_elapsed_time <= end_time
+    ).first()

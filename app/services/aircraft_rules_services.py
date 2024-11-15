@@ -30,7 +30,7 @@ class AircraftRulesServices:
         Verifica si la aeronave está disponible en el período de tiempo solicitado
         """
         # Parsear las fechas y tiempos
-        parsed_date = datetime.strptime(departure_date, '%d-%m-%Y').date()
+        parsed_date = datetime.strptime(departure_date, '%Y-%m-%d').date()
         parsed_time = datetime.strptime(departure_time, '%H%M').time()
         parsed_elapsed = datetime.strptime(total_estimated_elapsed_time, '%H:%M').time()
         

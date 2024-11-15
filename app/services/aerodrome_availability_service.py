@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta, time
 from app.repositories import FlightPlanRepository
 from app.models import FlightPlan
+from marshmallow import ValidationError
 
 class AerodromeAvailabilityService:
     def __init__(self):
         self.flightplan_repository = FlightPlanRepository()
     
-    def check_departure_aerodrome_availability(self, departure_aerodrome_id: int, departure_date: str, departure_time: str) -> FlightPlan:
+    def check_departure_aerodrome_availability(self, departure_aerodrome_id: int, departure_date: str, departure_time: str) -> None:
         """
         Verifica si hay otro plan de vuelo usando el mismo aeródromo de salida en la misma fecha y hora
         """
@@ -14,9 +15,13 @@ class AerodromeAvailabilityService:
         parsed_time = datetime.strptime(departure_time, '%H%M').time()
         
         existing_plan = self.flightplan_repository.find_by_departure(departure_aerodrome_id, parsed_date, parsed_time)
-        return existing_plan
+        if existing_plan:
+            raise ValidationError(
+                f"El aeródromo de salida {departure_aerodrome_id} no está disponible a las {departure_time}. "
+                f"Ya está asignado al plan de vuelo {existing_plan.id}"
+            )
     
-    def check_destination_aerodrome_availability(self, aerodrome_id: int, departure_date: str, departure_time: str, total_estimated_elapsed_time: str) -> FlightPlan:
+    def check_destination_aerodrome_availability(self, aerodrome_id: int, departure_date: str, departure_time: str, total_estimated_elapsed_time: str) -> None:
         """
         Verifica si hay otro plan de vuelo usando el aeródromo como destino en el lapso de tiempo estimado
         """
@@ -31,5 +36,25 @@ class AerodromeAvailabilityService:
         arrival_window_start = estimated_arrival - timedelta(minutes=30)
         arrival_window_end = estimated_arrival + timedelta(minutes=30)
         
-        existing_plan = self.flightplan_repository.find_by_destination_in_timeframe(aerodrome_id, arrival_window_start, arrival_window_end)
-        return existing_plan
+        existing_plan = self.flightplan_repository.find_by_destination_in_timeframe(
+            aerodrome_id, arrival_window_start, arrival_window_end
+        )
+        
+        if existing_plan:
+            raise ValidationError(
+                f"El aeródromo de destino {aerodrome_id} no está disponible en el horario estimado de llegada. "
+                f"Ya está asignado al plan de vuelo {existing_plan.id}"
+            )
+
+    def check_alternative_aerodromes_availability(self, aerodromes: list, departure_date: str, 
+                                                departure_time: str, total_estimated_elapsed_time: str) -> None:
+        """
+        Verifica la disponibilidad de los aeródromos alternativos
+        """
+        for aerodrome_id in aerodromes:
+            self.check_destination_aerodrome_availability(
+                aerodrome_id,
+                departure_date,
+                departure_time,
+                total_estimated_elapsed_time
+            )
