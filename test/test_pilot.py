@@ -78,15 +78,7 @@ class PilotTestCase(unittest.TestCase):
         pilot = self.__new_pilot()
         pilot_save = repository.save(pilot)
         pilot_save.first_name = "Jane"
-        pilot_update = repository.save(pilot_save)
-        self.assertIsNotNone(pilot_update)
-        self.assertEqual(pilot_save.first_name, "Jane")
-        
-    def test_update(self):
-        pilot = self.__new_pilot()
-        pilot_save = repository.save(pilot)
-        pilot_save.first_name = "Jane"
-        pilot_update = repository.update(pilot_save)
+        pilot_update = repository.update(pilot_save, pilot_save.id)
         self.assertIsNotNone(pilot_update)
         self.assertEqual(pilot_update.first_name, "Jane")
     

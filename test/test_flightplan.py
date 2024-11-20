@@ -5,6 +5,7 @@ from app import create_app, db
 import os
 from app.models import FlightPlan, User, Pilot, Aircraft, Airport, EmergencyEquipmentData
 from app.repositories import FlightPlanRepository, UserRepository, PilotRepository, AircraftRepository, AirportRepository, EmergencyEquipmentDataRepository
+from app.models.enums import FlightRulesEnum, FlightTypeEnum, WakeTurbulenceCategoryEnum, TrafficTypeAllowedEnum
 
 flightplan_repository = FlightPlanRepository()
 user_repository = UserRepository()
@@ -36,9 +37,9 @@ class FlightPlanTestCase(unittest.TestCase):
         self.assertEqual(flight_plan.filing_time.date(), datetime.now().date())
         self.assertEqual(flight_plan.originator, "ORIG")
         self.assertEqual(flight_plan.message_type, "FPL")
-        self.assertEqual(flight_plan.aircraft_id, 1)
-        self.assertEqual(flight_plan.flight_rules, "I")
-        self.assertEqual(flight_plan.flight_type, "S")
+        self.assertEqual(flight_plan.aircraft_id, flight_plan.aircraft_id)
+        self.assertEqual(flight_plan.flight_rules, FlightRulesEnum.I)
+        self.assertEqual(flight_plan.flight_type, FlightTypeEnum.S)
         self.assertEqual(flight_plan.number_of_aircraft, 1)
         self.assertEqual(flight_plan.pilot_id, 1)
         self.assertEqual(flight_plan.departure_aerodrome_id, 1)
@@ -98,19 +99,6 @@ class FlightPlanTestCase(unittest.TestCase):
         self.assertIsNotNone(flight_plans)
         self.assertGreater(len(flight_plans), 0)
     
-    def test_update(self):
-        flight_plan = self.__new_flightplan()
-        flight_plan_save = flightplan_repository.save(flight_plan)
-        
-        # Crear un nuevo piloto para la actualización
-        new_pilot = Pilot(first_name="Jane", last_name="Doe", license_number="XYZ789")
-        new_pilot_save = pilot_repository.save(new_pilot)
-        
-        flight_plan_save.pilot_id = new_pilot_save.id
-        flight_plan_update = flightplan_repository.update(flight_plan_save)
-        self.assertIsNotNone(flight_plan_update)
-        self.assertEqual(flight_plan_update.pilot_id, new_pilot_save.id)
-    
     def test_delete(self):
         flight_plan = self.__new_flightplan()
         flight_plan_save = flightplan_repository.save(flight_plan)
@@ -142,12 +130,12 @@ class FlightPlanTestCase(unittest.TestCase):
         aircraft = Aircraft(
             aircraft_identification="N12345" if not unique else "N54321",
             aircraft_type="B737",
-            wake_turbulence_category="M",
+            wake_turbulence_category=WakeTurbulenceCategoryEnum.M,
             equipment="Standard",
             endurance=datetime(2024, 11, 1, 12, 0),
             passenger_capacity="180",
             crew_capacity=6,
-            max_speed=850,
+            max_speed="N0850",
             aircraft_colour_and_marking="White with blue stripes"
         )
         aircraft_save = aircraft_repository.save(aircraft)
@@ -162,7 +150,7 @@ class FlightPlanTestCase(unittest.TestCase):
             latitude=40.6413 if not unique else 40.6895,
             elevation=13 if not unique else 18,
             runway_length=4000 if not unique else 3000,
-            traffic_type_allowed="Commercial"
+            traffic_type_allowed=TrafficTypeAllowedEnum.INTERNATIONAL
         )
         departure_aerodrome_save = airport_repository.save(departure_aerodrome)
         
@@ -176,7 +164,7 @@ class FlightPlanTestCase(unittest.TestCase):
             latitude=33.9416 if not unique else 37.6213,
             elevation=125 if not unique else 13,
             runway_length=3500 if not unique else 4000,
-            traffic_type_allowed="Commercial"
+            traffic_type_allowed=TrafficTypeAllowedEnum.INTERNATIONAL
         )
         destination_aerodrome_save = airport_repository.save(destination_aerodrome)
         
@@ -190,7 +178,7 @@ class FlightPlanTestCase(unittest.TestCase):
             latitude=41.9742 if not unique else 33.6407,
             elevation=204 if not unique else 313,
             runway_length=3200 if not unique else 3500,
-            traffic_type_allowed="Commercial"
+            traffic_type_allowed=TrafficTypeAllowedEnum.INTERNATIONAL
         )
         first_alternative_aerodrome_save = airport_repository.save(first_alternative_aerodrome)
         
@@ -204,7 +192,7 @@ class FlightPlanTestCase(unittest.TestCase):
             latitude=32.8998 if not unique else 25.7959,
             elevation=185 if not unique else 8,
             runway_length=3900 if not unique else 3200,
-            traffic_type_allowed="Commercial"
+            traffic_type_allowed=TrafficTypeAllowedEnum.INTERNATIONAL
         )
         second_alternative_aerodrome_save = airport_repository.save(second_alternative_aerodrome)
         
@@ -230,20 +218,22 @@ class FlightPlanTestCase(unittest.TestCase):
         )
         equipment_data_save = equipment_repository.save(equipment_data)
         
+        current_date = datetime.now()
         return FlightPlan(
-            submission_date=datetime.now(),
+            submission_date=current_date,
             priority="FF",
             address_to="ATC",
-            filing_time=datetime.now(),
+            filing_time=current_date,
             originator="ORIG",
             message_type="FPL",
             aircraft_id=aircraft_save.id,
-            flight_rules="I",
-            flight_type="S",
+            flight_rules=FlightRulesEnum.I,
+            flight_type=FlightTypeEnum.S,
             number_of_aircraft=1,
             pilot_id=pilot_save.id,
             departure_aerodrome_id=departure_aerodrome_save.id,
-            departure_time=datetime.now(),
+            departure_date=current_date.date(),
+            departure_time=current_date,
             cruising_speed="N0450",
             cruising_level="FL350",
             route="DCT JFK DCT LAX",

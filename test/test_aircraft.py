@@ -5,6 +5,7 @@ from app import create_app, db
 import os
 from app.models import Aircraft
 from app.repositories import AircraftRepository
+from app.models.enums import WakeTurbulenceCategoryEnum
 
 repository = AircraftRepository()
 
@@ -27,12 +28,12 @@ class AircraftTestCase(unittest.TestCase):
         self.assertIsNotNone(aircraft)
         self.assertEqual(aircraft.aircraft_identification, "ABC123")
         self.assertEqual(aircraft.aircraft_type, "B737")
-        self.assertEqual(aircraft.wake_turbulence_category, "M")
+        self.assertEqual(aircraft.wake_turbulence_category, WakeTurbulenceCategoryEnum.M)
         self.assertEqual(aircraft.equipment, "Standard")
         self.assertEqual(aircraft.endurance, datetime(2024, 11, 1, 12, 0))
         self.assertEqual(aircraft.passenger_capacity, "180")
         self.assertEqual(aircraft.crew_capacity, 6)
-        self.assertEqual(aircraft.max_speed, 850)
+        self.assertEqual(aircraft.max_speed, "N0850")
         self.assertEqual(aircraft.aircraft_colour_and_marking, "White with blue stripes")
     
     def test_compare_aircraft(self):
@@ -103,12 +104,12 @@ class AircraftTestCase(unittest.TestCase):
         return Aircraft(
             aircraft_identification="ABC123",
             aircraft_type="B737",
-            wake_turbulence_category="M",
+            wake_turbulence_category=WakeTurbulenceCategoryEnum.M,
             equipment="Standard",
             endurance=datetime(2024, 11, 1, 12, 0),
             passenger_capacity="180",
             crew_capacity=6,
-            max_speed=850,
+            max_speed="N0850",
             aircraft_colour_and_marking="White with blue stripes"
         )
 

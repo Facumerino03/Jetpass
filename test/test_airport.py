@@ -4,6 +4,7 @@ from app import create_app, db
 import os
 from app.models import Airport
 from app.repositories import AirportRepository
+from app.models.enums import TrafficTypeAllowedEnum
 
 repository = AirportRepository()
 
@@ -33,7 +34,7 @@ class AirportTestCase(unittest.TestCase):
         self.assertEqual(airport.latitude, 40.6413)
         self.assertEqual(airport.elevation, 13)
         self.assertEqual(airport.runway_length, 4000)
-        self.assertEqual(airport.traffic_type_allowed, "Commercial")
+        self.assertEqual(airport.traffic_type_allowed, TrafficTypeAllowedEnum.INTERNATIONAL)
     
     def test_compare_airport(self):
         airport = self.__new_airport()
@@ -61,6 +62,7 @@ class AirportTestCase(unittest.TestCase):
         airport = self.__new_airport()
         airport2 = self.__new_airport()
         airport2.airport_code = "LAX"
+        airport2.traffic_type_allowed = TrafficTypeAllowedEnum.INTERNATIONAL
         airport_save = repository.save(airport)
         airport2_save = repository.save(airport2)
         self.assertIsNotNone(airport_save)
@@ -85,7 +87,7 @@ class AirportTestCase(unittest.TestCase):
         airport = self.__new_airport()
         airport_save = repository.save(airport)
         airport_save.name = "Los Angeles International Airport"
-        airport_update = repository.update(airport_save)
+        airport_update = repository.update(airport_save, airport_save.id)
         self.assertIsNotNone(airport_update)
         self.assertEqual(airport_update.name, "Los Angeles International Airport")
     
@@ -110,7 +112,7 @@ class AirportTestCase(unittest.TestCase):
             latitude=40.6413,
             elevation=13,
             runway_length=4000,
-            traffic_type_allowed="Commercial"
+            traffic_type_allowed=TrafficTypeAllowedEnum.INTERNATIONAL
         )
 
 if __name__ == '__main__':

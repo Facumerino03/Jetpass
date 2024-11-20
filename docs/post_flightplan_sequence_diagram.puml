@@ -40,7 +40,7 @@ activate FlightPlanServices
 
 FlightPlanServices -> ValidationResult: success()
 note right of ValidationResult
-  ValidationResult (Collector Pattern):
+  ValidationResult:
   - Recolecta errores de diferentes validaciones
   - Mantiene estado de validación (is_valid)
   - Permite combinar resultados (merge)
