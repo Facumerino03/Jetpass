@@ -71,13 +71,31 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Del
 
     def find_by_departure(self, aerodrome_id: int, departure_date: datetime.date, departure_time: datetime.time) -> FlightPlan:
         '''
-        Finds a flight plan by its departure aerodrome id, departure date and departure time
-        param:
-            aerodrome_id: int
-            departure_date: datetime.date
-            departure_time: datetime.time
-        return:
-            FlightPlan: The flight plan found
+        Finds a flight plan by departure aerodrome, date and time.
+        
+        The generated SQL query would be equivalent to:
+        
+        SELECT * FROM flight_plans 
+        WHERE departure_aerodrome_id = :aerodrome_id 
+        AND departure_date = :departure_date 
+        AND departure_time = :departure_time 
+        LIMIT 1
+        
+        This query is used to verify if there is another flight plan
+        scheduled for the same aerodrome at the same departure date and time,
+        which is not allowed by business rules.
+        
+        Args:
+            aerodrome_id (int): Departure aerodrome ID
+            departure_date (datetime.date): Departure date
+            departure_time (datetime.time): Departure time
+        
+        Returns:
+            FlightPlan: The found flight plan or None if none exists
+        
+        Example:
+            >>> repo.find_by_departure(1, date(2024,3,20), time(14,30))
+            <FlightPlan id=123>
         '''
         return FlightPlan.query.filter(
             FlightPlan.departure_aerodrome_id == aerodrome_id,
@@ -87,13 +105,34 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Del
     
     def find_by_destination_in_timeframe(self, aerodrome_id: int, arrival_window_start: datetime, arrival_window_end: datetime) -> list[FlightPlan]:
         '''
-        Finds flight plans by its destination aerodrome id, arrival window start and arrival window end
-        param:
-            aerodrome_id: int
-            arrival_window_start: datetime
-            arrival_window_end: datetime
-        return:
-            list[FlightPlan]: The list of flight plans found
+        Finds flight plans that have the given aerodrome as destination or alternative 
+        within a specific time window.
+        
+        The generated SQL query would be equivalent to:
+        
+        SELECT * FROM flight_plans 
+        WHERE (destination_aerodrome_id = :aerodrome_id 
+               OR first_alternative_aerodrome_id = :aerodrome_id 
+               OR second_alternative_aerodrome_id = :aerodrome_id)
+        AND departure_date = :arrival_window_start_date
+        AND CAST(departure_time AS TIME) BETWEEN :arrival_window_start_time AND :arrival_window_end_time
+        
+        This query is used to check if there are other flight plans that might be 
+        arriving at the same aerodrome within a ±30-minute window of the estimated arrival time.
+        
+        Args:
+            aerodrome_id (int): ID of the aerodrome to check
+            arrival_window_start (datetime): Start of the arrival time window
+            arrival_window_end (datetime): End of the arrival time window
+        
+        Returns:
+            list[FlightPlan]: List of flight plans found in the time window
+        
+        Example:
+            >>> start = datetime(2024, 3, 20, 14, 0)
+            >>> end = datetime(2024, 3, 20, 15, 0)
+            >>> repo.find_by_destination_in_timeframe(1, start, end)
+            [<FlightPlan id=123>, <FlightPlan id=124>]
         '''
         return FlightPlan.query.filter(
             or_(
@@ -110,13 +149,33 @@ class FlightPlanRepository(CreateAbstractRepository, ReadAbstractRepository, Del
 
     def find_by_aircraft_in_timeframe(self, aircraft_id: int, start_time: datetime, end_time: datetime) -> FlightPlan:
         '''
-        Finds flight plans by its aircraft id, start time and end time
-        param:
-            aircraft_id: int
-            start_time: datetime
-            end_time: datetime
-        return:
-            FlightPlan: The flight plan found
+        Finds if an aircraft is already scheduled for a flight plan within the given timeframe.
+        
+        The generated SQL query would be equivalent to:
+        
+        SELECT * FROM flight_plans 
+        WHERE aircraft_id = :aircraft_id
+        AND (departure_date + departure_time) >= :start_time
+        AND (departure_date + departure_time + total_estimated_elapsed_time) <= :end_time
+        LIMIT 1
+        
+        This query checks if the aircraft is already assigned to another flight plan
+        that overlaps with the requested time period. It considers both the departure
+        time and the estimated flight duration to determine availability.
+        
+        Args:
+            aircraft_id (int): ID of the aircraft to check
+            start_time (datetime): Start of the requested time period
+            end_time (datetime): End of the requested time period
+        
+        Returns:
+            FlightPlan: The conflicting flight plan if found, None otherwise
+        
+        Example:
+            >>> start = datetime(2024, 3, 20, 14, 0)
+            >>> end = datetime(2024, 3, 20, 18, 0)
+            >>> repo.find_by_aircraft_in_timeframe(1, start, end)
+            <FlightPlan id=123>
         '''
         return FlightPlan.query.filter(
         FlightPlan.aircraft_id == aircraft_id,
